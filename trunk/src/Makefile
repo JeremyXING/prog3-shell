@@ -3,10 +3,13 @@ YACC 	= yacc -d -v
 CC	= gcc -std=c99 -g -D_POSIX_SOURCE -Wall
 LIBS	= -lfl
 
+
 Shell: Shell.o y.tab.o lex.yy.o
 	$(CC) -o Shell Shell.o y.tab.o lex.yy.o $(LIBS)
 
 Shell.o: Shell.c Shell.h
+
+builtin.o: builtin.c builtin.h
 
 lex.yy.o: lex.yy.c y.tab.h Shell.h
 
