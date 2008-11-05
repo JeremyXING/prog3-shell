@@ -111,7 +111,9 @@ int
 main (int argc, char **argv) 
 {
   while (1){
+    printf(">");
     if (yyparse () == 0){
+
       /*--------------------------------------------------------------------------------------.
       | L'analyse de la ligne de commande est effectuée sans erreur.  La variable globale     |
       |       ExpressionAnalysee pointe sur un arbre représentant l'expression.  Le type      |
@@ -153,7 +155,6 @@ main (int argc, char **argv)
       `--------------------------------------------------------------------------------------*/
       
       // executer(ExpressionAnalysee);
-      
       pid_t pid;
       if((pid=fork())==0)
 	{
