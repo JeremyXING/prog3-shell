@@ -1,6 +1,8 @@
 /* Construction des arbres représentant des commandes */
 
 #include "Shell.h"
+#include <sys/types.h>
+#include <sys/wait.h>
 
 /*
  * Construit une expression à partir de sous-expressions
@@ -85,6 +87,25 @@ void yyerror (char *s)
 }
 
 int
+executer(Expression *e)
+{
+  pid_t pid;
+  if((pid=fork())==0)
+    {
+      execlp(e->arguments[0], e->arguments[0],NULL);
+      perror("exec");
+      exit(1);
+    }
+  int status;
+  //while(pid=waitpid(-1,&status,WNOHANG)>0) a metre qque part!
+  wait(&status);
+  return status;
+  
+}
+
+
+
+int
 main (int argc, char **argv) 
 {
   while (1){
@@ -126,7 +147,13 @@ main (int argc, char **argv)
       | 										      |
       |      - si le type de la commande est une redirection, (e.arguments)[0] est le nom du  |
       |       fichier vers lequel on redirige.						      |
+
       `--------------------------------------------------------------------------------------*/
+      
+      executer(ExpressionAnalysee);
+
+
+      
       fprintf (stderr,"Expression syntaxiquement correcte.\n");
     }
     else {
