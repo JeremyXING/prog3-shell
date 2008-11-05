@@ -1,8 +1,7 @@
 /* Construction des arbres représentant des commandes */
 
 #include "Shell.h"
-#include <sys/types.h>
-#include <sys/wait.h>
+#include "builtin.h"
 
 /*
  * Construit une expression à partir de sous-expressions
@@ -86,12 +85,15 @@ void yyerror (char *s)
    fprintf(stderr, "%s\n", s);
 }
 
-int
+/*int
 executer(Expression *e)
 {
   pid_t pid;
   if((pid=fork())==0)
     {
+      if(check_builtin(e->argument[0]))
+	printf("commande builin\n");
+      else printf("commande externe\n");
       execlp(e->arguments[0], e->arguments[0],NULL);
       perror("exec");
       exit(1);
@@ -100,8 +102,8 @@ executer(Expression *e)
   //while(pid=waitpid(-1,&status,WNOHANG)>0) a metre qque part!
   wait(&status);
   return status;
-  
-}
+
+  } */
 
 
 
@@ -150,9 +152,20 @@ main (int argc, char **argv)
 
       `--------------------------------------------------------------------------------------*/
       
-      executer(ExpressionAnalysee);
-
-
+      // executer(ExpressionAnalysee);
+      
+      pid_t pid;
+      if((pid=fork())==0)
+	{
+	  if(check_builtin(ExpressionAnalysee->arguments[0]))
+	    printf("commande builin\n");
+	  else 
+	    printf("commande externe\n");
+	  execlp(ExpressionAnalysee->arguments[0], ExpressionAnalysee->arguments[0],NULL);
+	  perror("exec");
+	  exit(1);
+	}
+      
       
       fprintf (stderr,"Expression syntaxiquement correcte.\n");
     }
