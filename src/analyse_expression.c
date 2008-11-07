@@ -2,19 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
 #include "analyse_expression.h"
-#include "Commande.h"
+#include "commande.h"
 
 
 
-/*----------- Tableau des fonctions (Commande.h) ---------- */
+/*----------- Tableau des fonctions internes(commande.h) ---------- */
 #define NB_FONCTION 2
-char * nom_fonction[NB_FONCTION] = { "ls", "cd" };
-fonction  tableau_fonction[NB_FONCTION] = { ls, cd };
+char * nom_fonction[NB_FONCTION] = { "pwd", "cd" };
+fonction  tableau_fonction[NB_FONCTION] = { pwd, cd };
 
 
-/*Recherche la commande dans le tableau des fonctions et l'execute si elle existe*/
+/*Recherche la commande dans le tableau des fonctions internes et l'execute si elle existe*/
 void executer_cmd(Expression * e){
   bool trouver = false;
   char * nom_commande = e->arguments[0];
@@ -23,13 +22,17 @@ void executer_cmd(Expression * e){
     if( strcmp(nom_fonction[i], nom_commande) == 0 ){
       trouver = true;
       fonction f = tableau_fonction[i];
-      (f)(e->arguments); // appel de la fonction
+      (f)(e->arguments); // appel de la fonction interne
       break;
     }
   }
 
-  if(! trouver)
-    printf("Commande inconnue.\n");
+  if(! trouver){
+    if(fork() == 0){
+      execlp(e->arguments[0], NULL, NULL);
+      perror("");
+    }
+  }
 }
 
 /* Analyse de l'expression */
