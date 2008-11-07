@@ -3,14 +3,14 @@ YACC 	= yacc -d -v
 CC	= gcc -std=c99 -g -D_POSIX_SOURCE -Wall
 LIBS	= -lfl
 
-Shell: Shell.o analyse_expression.o Commande.o y.tab.o lex.yy.o
-	$(CC) -o Shell Shell.o analyse_expression.o Commande.o y.tab.o lex.yy.o $(LIBS)
+Shell: Shell.o analyse_expression.o commande.o y.tab.o lex.yy.o
+	$(CC) -o Shell Shell.o analyse_expression.o commande.o y.tab.o lex.yy.o $(LIBS)
 
 Shell.o: Shell.c Shell.h
 
 analyse_expression.o: analyse_expression.c analyse_expression.h 
 
-Commande.o: Commande.c Commande.h
+commande.o: commande.c commande.h
 
 lex.yy.o: lex.yy.c y.tab.h Shell.h
 
