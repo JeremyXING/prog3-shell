@@ -5,9 +5,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
 
 #define NB_ARGS 50
 #define TAILLE_ID 500
