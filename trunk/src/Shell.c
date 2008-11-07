@@ -1,7 +1,7 @@
 /* Construction des arbres représentant des commandes */
 
 #include "Shell.h"
-#include "builtin.h"
+#include "analyse_expression.h"
 
 /*
  * Construit une expression à partir de sous-expressions
@@ -85,34 +85,15 @@ void yyerror (char *s)
    fprintf(stderr, "%s\n", s);
 }
 
-/*int
-executer(Expression *e)
-{
-  pid_t pid;
-  if((pid=fork())==0)
-    {
-      if(check_builtin(e->argument[0]))
-	printf("commande builin\n");
-      else printf("commande externe\n");
-      execlp(e->arguments[0], e->arguments[0],NULL);
-      perror("exec");
-      exit(1);
-    }
-  int status;
-  //while(pid=waitpid(-1,&status,WNOHANG)>0) a metre qque part!
-  wait(&status);
-  return status;
-
-  } */
-
-
 
 int
 main (int argc, char **argv) 
 {
   while (1){
-    printf(">");
     if (yyparse () == 0){
+      Expression * e = ExpressionAnalysee;
+      analyse_cmd(e);
+      
 
       /*--------------------------------------------------------------------------------------.
       | L'analyse de la ligne de commande est effectuée sans erreur.  La variable globale     |
@@ -151,24 +132,8 @@ main (int argc, char **argv)
       | 										      |
       |      - si le type de la commande est une redirection, (e.arguments)[0] est le nom du  |
       |       fichier vers lequel on redirige.						      |
-
       `--------------------------------------------------------------------------------------*/
-      
-      // executer(ExpressionAnalysee);
-      pid_t pid;
-      if((pid=fork())==0)
-	{
-	  if(check_builtin(ExpressionAnalysee->arguments[0]))
-	    printf("commande builin\n");
-	  else 
-	    printf("commande externe\n");
-	  execlp(ExpressionAnalysee->arguments[0], ExpressionAnalysee->arguments[0],NULL);
-	  perror("exec");
-	  exit(1);
-	}
-      
-      
-      fprintf (stderr,"Expression syntaxiquement correcte.\n");
+      //fprintf (stderr,"Expression syntaxiquement correcte.\n");
     }
     else {
       /* L'analyse de la ligne de commande a donné une erreur */
