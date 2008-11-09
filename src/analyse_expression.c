@@ -12,13 +12,15 @@
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd };
 
+typedef int pid_t;
+
 /*Execute le tube suivant : gauche | droite */
 static void tube(Expression * gauche, Expression * droite){
 
  if(fork()==0){ //Processus fils du mini Shell
     int tube[2];
     pipe(tube);
-    int status;
+    //int status;
 
     pid_t processus = fork();
     switch(processus){
@@ -30,7 +32,8 @@ static void tube(Expression * gauche, Expression * droite){
       perror("exec");
       break;
     default: //pere
-      waitpid(0, &status, WNOHANG);
+      //waitpid(0, &status, WNOHANG);
+      wait(NULL);
       dup2(tube[0],0);
       close(tube[0]);
       close(tube[1]);
