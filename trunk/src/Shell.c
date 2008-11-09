@@ -93,6 +93,9 @@ main (int argc, char **argv)
     if (yyparse () == 0){
       Expression * e = ExpressionAnalysee;
       analyse_cmd(e);
+      printf("Arbre : ");
+      arbre(e);
+      printf("\n");
       
 
       /*--------------------------------------------------------------------------------------.
