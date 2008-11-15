@@ -111,7 +111,8 @@ void executer_cmd(Expression * e){
 
   if(! trouver){
     if(fork() == 0){
-      execlp(e->arguments[0], NULL, NULL);
+      //execlp(e->arguments[0], NULL, NULL);//Ne fonctionne pas, ne tient pas compte des options
+      execvp(e->arguments[0], e->arguments );
       perror("");
     }
   }
