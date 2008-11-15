@@ -19,5 +19,8 @@ void  pwd(char ** arguments){
 }
 
 void  cd(char ** arguments){
-  printf("Commande cd\n");
+  
+  chdir(arguments[1]);//c'est ce que j'ai trouver comme appel systeme,
+                      //ça marche
+  //printf("Commande cd\n");
 }
