@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/wait.h>
 #include "analyse_expression.h"
 #include "commande.h"
 
@@ -116,6 +117,9 @@ void executer_cmd(Expression * e){
       perror("");
     }
   }
+  wait(NULL);
+  afficher_prompt();
+
 }
 
 /* Analyse de l'expression */
@@ -133,4 +137,26 @@ void analyse_cmd(Expression * e){
   }
 }
 
+void afficher_prompt(void){
 
+  /* Recuperation de whoami */
+  char * user = NULL;
+  user = getenv("USER");//extrait le contenu de la variable d'environnemtn USER
+  //a bidouiller car si USER existe pas, pas bon...
+
+
+
+  /* Code de pwd() */
+  long size;
+  char *buf;
+  char *ptr;
+  
+  size = pathconf(".", _PC_PATH_MAX);
+  if ((buf = (char *)malloc((size_t)size)) != NULL)
+    {
+      ptr = getcwd(buf, (size_t)size);
+    }
+  /* Fin Code de pwd() */  
+  
+  printf("%s [%s]-$ ", user, ptr);
+}

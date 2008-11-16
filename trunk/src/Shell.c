@@ -89,13 +89,15 @@ void yyerror (char *s)
 int
 main (int argc, char **argv) 
 {
+  system("clear");
+  afficher_prompt();
   while (1){
     if (yyparse () == 0){
       Expression * e = ExpressionAnalysee;
       analyse_cmd(e);
-      printf("Arbre : ");
-      arbre(e);
-      printf("\n");
+      /*      printf("Arbre : ");
+	      arbre(e);
+	      printf("\n");*/
       
 
       /*--------------------------------------------------------------------------------------.
