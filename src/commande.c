@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <signal.h>
+
 #include "commande.h"
 
-
-void  pwd(char ** arguments){
+int  pwd(char ** arguments){
   long size;
   char *buf;
   char *ptr;
@@ -17,12 +19,20 @@ void  pwd(char ** arguments){
   
   printf("%s\n", ptr);
 
+  return 0;
+
 }
 
-void  cd(char ** arguments){
+int  cd(char ** arguments){
   
-  chdir(arguments[1]);//c'est ce que j'ai trouver comme appel systeme,
+  int retour = chdir(arguments[1]);//c'est ce que j'ai trouver comme appel systeme,
                       //ça marche
   //printf("Commande cd\n");
+
+  if(retour == -1){
+    fprintf(stderr, "%s : Aucun dossier de ce type\n", arguments[1]);
+    return 1;
+  }
+  else return 0;
 }
 

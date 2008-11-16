@@ -105,20 +105,25 @@ void executer_cmd(Expression * e){
     if( strcmp(nom_fonction[i], nom_commande) == 0 ){
       trouver = true;
       fonction f = tableau_fonction[i];
-      (f)(e->arguments); // appel de la fonction interne
+      int retour = (f)(e->arguments); // appel de la fonction interne
+      afficher_prompt(retour);
       break;
     }
   }
 
   if(! trouver){
+    int retour;
     if(fork() == 0){
       //execlp(e->arguments[0], NULL, NULL);//Ne fonctionne pas, ne tient pas compte des options
-      execvp(e->arguments[0], e->arguments );
-      perror("");
+      retour = execvp(e->arguments[0], e->arguments );
+      if(retour == -1)
+	fprintf(stderr, "%s : command not found\n", e->arguments[0]);
     }
+    retour = wait(NULL);
+    if(retour == -1)
+      afficher_prompt(1);
+    else afficher_prompt(0);
   }
-  wait(NULL);
-  afficher_prompt();
 
 }
 
@@ -137,7 +142,7 @@ void analyse_cmd(Expression * e){
   }
 }
 
-void afficher_prompt(void){
+void afficher_prompt(int retour){
 
   /* Recuperation de whoami */
   char * user = NULL;
@@ -157,6 +162,10 @@ void afficher_prompt(void){
       ptr = getcwd(buf, (size_t)size);
     }
   /* Fin Code de pwd() */  
+
+  if(retour == 1)
+    retour = 1;
+  else retour = 0;
   
-  printf("%s [%s]-$ ", user, ptr);
+  printf("%s [%s] %d -$ ", user, ptr, retour);
 }
