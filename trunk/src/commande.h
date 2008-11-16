@@ -1,10 +1,10 @@
 #ifndef COMMANDE_H
 #define COMMANDE_H
 
-typedef void (*fonction)(char **); 
+typedef int (*fonction)(char **); 
 
-extern void  pwd(char ** arguments);
-extern void  cd(char ** arguments);
+extern int  pwd(char ** arguments);
+extern int  cd(char ** arguments);
 
 
 #endif /* COMMANDE_H */
