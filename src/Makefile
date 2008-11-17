@@ -8,9 +8,9 @@ Shell: Shell.o analyse_expression.o commande.o y.tab.o lex.yy.o
 
 Shell.o: Shell.c Shell.h
 
-analyse_expression.o: analyse_expression.c analyse_expression.h 
+analyse_expression.o: analyse_expression.c analyse_expression.h Shell.h
 
-commande.o: commande.c commande.h
+commande.o: commande.c commande.h analyse_expression.h
 
 lex.yy.o: lex.yy.c y.tab.h Shell.h
 

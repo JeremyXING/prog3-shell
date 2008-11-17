@@ -95,9 +95,6 @@ main (int argc, char **argv)
     if (yyparse () == 0){
       Expression * e = ExpressionAnalysee;
       analyse_cmd(e);
-      /*      printf("Arbre : ");
-	      arbre(e);
-	      printf("\n");*/
       
 
       /*--------------------------------------------------------------------------------------.
@@ -138,11 +135,10 @@ main (int argc, char **argv)
       |      - si le type de la commande est une redirection, (e.arguments)[0] est le nom du  |
       |       fichier vers lequel on redirige.						      |
       `--------------------------------------------------------------------------------------*/
-      //fprintf (stderr,"Expression syntaxiquement correcte.\n");
     }
     else {
       /* L'analyse de la ligne de commande a donné une erreur */
-      fprintf (stderr,"Expression syntaxiquement incorrecte !\n");
+      afficher_prompt(1);
     }
   }
   return 0;
