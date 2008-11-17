@@ -3,17 +3,45 @@
 #include <string.h>
 #include <stdbool.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <fcntl.h>
+
 #include "analyse_expression.h"
 #include "commande.h"
+#include "Shell.h"
+
 
 
 
 /*----------- Tableau des fonctions internes(commande.h) ---------- */
-#define NB_FONCTION 2
-char * nom_fonction[NB_FONCTION] = { "pwd", "cd" };
-fonction  tableau_fonction[NB_FONCTION] = { pwd, cd };
+char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", "killer", "times", "toexit" };
+fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, killer, times, toexit};
 
-typedef int pid_t;
+int ecrire_history(char ** arguments){
+
+  int argc = LongueurListe(arguments);
+
+  int fichier = open("history.tmp", O_WRONLY | O_CREAT | O_APPEND, 0644);
+  if(fichier == -1){
+    perror("");
+    return 1;
+  }
+
+  int i;
+  char * espace = " ";
+  for(i = 0; i < argc; i++){
+    write(fichier, arguments[i], strlen(arguments[i]) * sizeof(char));
+    write(fichier, espace, sizeof(char));
+  }
+  
+  char * back = "\n";
+  write(fichier, back, sizeof(char));
+
+  close(fichier);  
+
+  return 0;
+
+}
 
 /*Execute le tube suivant : gauche | droite */
 static void tube(Expression * gauche, Expression * droite){
@@ -129,6 +157,9 @@ void executer_cmd(Expression * e){
 
 /* Analyse de l'expression */
 void analyse_cmd(Expression * e){
+
+  ecrire_history(e->arguments);
+
   switch(e->type){
   case SIMPLE:
     executer_cmd(e); // Dans le cas d'une commande simple, on l'execute.
@@ -142,15 +173,16 @@ void analyse_cmd(Expression * e){
   }
 }
 
+/*Contruction du prompt */
 void afficher_prompt(int retour){
 
   /* Recuperation de whoami */
   char * user = NULL;
   user = getenv("USER");//extrait le contenu de la variable d'environnemtn USER
-  //a bidouiller car si USER existe pas, pas bon...
+  if(user == NULL)
+    user = "unknown_user";
 
-
-
+  
   /* Code de pwd() */
   long size;
   char *buf;
@@ -169,3 +201,7 @@ void afficher_prompt(int retour){
   
   printf("%s [%s] %d -$ ", user, ptr, retour);
 }
+
+
+
+
