@@ -14,13 +14,14 @@
 
 
 /*----------- Tableau des fonctions internes(commande.h) ---------- */
-char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", "killer", "times", "toexit" };
+char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", "kill", "times", "exit" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, killer, times, toexit};
 
+/*Le nom de la fonction n'est pas obligé de corespondre a la fonction (ex: "kill" associé a killer()), ca fonctionne.
+/*-----------------------------------------------------------------*/
+
 int ecrire_history(char ** arguments){
-
   int argc = LongueurListe(arguments);
-
   int fichier = open("history.tmp", O_WRONLY | O_CREAT | O_APPEND, 0644);
   if(fichier == -1){
     perror("");
@@ -36,11 +37,8 @@ int ecrire_history(char ** arguments){
   
   char * back = "\n";
   write(fichier, back, sizeof(char));
-
   close(fichier);  
-
   return 0;
-
 }
 
 /*Execute le tube suivant : gauche | droite */
