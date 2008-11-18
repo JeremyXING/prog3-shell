@@ -67,10 +67,12 @@ int builtins(char ** arguments){
 }
 
 int killer(char ** arguments){
+  printf("Kill ca marche \n");
   return 0;
 }
 
 int toexit(char ** arguments){
+  printf("Exit ca marche \n");
   return 0;
 }
 
