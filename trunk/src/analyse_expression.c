@@ -17,7 +17,7 @@
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", "kill", "times", "exit" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, killer, times, toexit};
 
-/*Le nom de la fonction n'est pas obligé de corespondre a la fonction (ex: "kill" associé a killer()), ca fonctionne.
+/*Le nom de la fonction n'est pas obligé de corespondre a la fonction (ex: "kill" associé a killer()), ca fonctionne.*/
 /*-----------------------------------------------------------------*/
 
 int ecrire_history(char ** arguments){
@@ -144,6 +144,7 @@ void executer_cmd(Expression * e){
       retour = execvp(e->arguments[0], e->arguments );
       if(retour == -1)
 	fprintf(stderr, "%s : command not found\n", e->arguments[0]);
+      exit(EXIT_FAILURE);
     }
     retour = wait(NULL);
     if(retour == -1)
