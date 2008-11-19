@@ -72,8 +72,9 @@ int killer(char ** arguments){
 }
 
 int toexit(char ** arguments){
-  printf("Exit ca marche \n");
-  return 0;
+  printf("Exiting...\n");
+  printf("Bye bye !\n");
+  exit(EXIT_SUCCESS);
 }
 
 int times(char ** arguments){
