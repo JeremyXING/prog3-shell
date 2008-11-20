@@ -1,0 +1,5 @@
+Revision 25 (Mohamed):
+
+J'ai résolu le problème des multi-pipes, qui fonctionne desormais correctement.
+Par contre j'ai rencontré des soucis de bus-error causé par history et afficher_prompt,
+j'ai donc commenté toutes les fois ou elles apparaissait jusqu'a ce qu'elle soit corrigés.
