@@ -90,11 +90,13 @@ int
 main (int argc, char **argv) 
 {
   system("clear");
-  afficher_prompt(0);
+  // afficher_prompt(0);
   while (1){
     if (yyparse () == 0){
       Expression * e = ExpressionAnalysee;
-      analyse_cmd(e);
+      if (fork()==0)
+	analyse_cmd(e);
+      
       
 
       /*--------------------------------------------------------------------------------------.
