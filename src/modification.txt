@@ -1,5 +1,11 @@
-Revision 25 (Mohamed):
+Revision 25:
 
 J'ai résolu le problème des multi-pipes, qui fonctionne desormais correctement.
 Par contre j'ai rencontré des soucis de bus-error causé par history et afficher_prompt,
 j'ai donc commenté toutes les fois ou elles apparaissait jusqu'a ce qu'elle soit corrigés.
+
+
+Revision 26:
+
+Pipe récursif avec fonction builtin: ok
+Redirection des entrée, sorties, erreurs: ok

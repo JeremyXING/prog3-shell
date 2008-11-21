@@ -39,6 +39,7 @@ int ecrire_history(char ** arguments){
   return 0;
 }
 
+int executer_cmd(Expression * e);
 
 static void tube(Expression * gauche, Expression * droite){
     int tube[2];
@@ -49,8 +50,8 @@ static void tube(Expression * gauche, Expression * droite){
       dup2(tube[1], 1);
       close(tube[1]);
       if(gauche->type == SIMPLE){
-	execvp(gauche->arguments[0], gauche->arguments);
-	perror("exec");
+	executer_cmd(gauche);
+	exit(1);
       }
       else
 	analyse_cmd(gauche);
@@ -61,8 +62,8 @@ static void tube(Expression * gauche, Expression * droite){
       dup2(tube[0],0);
       close(tube[0]);
       if(droite->type == SIMPLE){
-	execvp(droite->arguments[0], droite->arguments);
-	perror("exec");
+	executer_cmd(droite);
+	exit(1);
       }
       else
 	analyse_cmd(droite);
@@ -71,33 +72,60 @@ static void tube(Expression * gauche, Expression * droite){
 }
 
 
+void redirection_stdout(Expression * e){
+  int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+  dup2(fd, 1);
+  analyse_cmd(e->gauche);
+  close(fd);
+}
 
-void executer_cmd(Expression * e){
+void redirection_stdin(Expression * e){
+  int fd = open(e->arguments[0], O_RDONLY, 0664);
+  dup2(fd, 0);
+  analyse_cmd(e->gauche);
+  close(fd);
+}
+
+void redirection_stdout_append(Expression * e){
+  int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_APPEND, 0664);
+  dup2(fd, 1);
+  analyse_cmd(e->gauche);
+  close(fd);
+}
+
+void redirection_stderr(Expression * e){
+  int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+  dup2(fd, 2);
+  analyse_cmd(e->gauche);
+  close(fd);
+}
+
+
+/*void redirection_stdout_stderr(Expression * e){
+  int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+  dup2(fd, 0);
+  dup2(fd, 2);
+  analyse_cmd(e->gauche);
+  close(fd);
+  }*/
+
+
+int executer_cmd(Expression * e){
   bool trouver = false;
   char * nom_commande = e->arguments[0];
   for(int i=0; i < NB_FONCTION; i++){
     if( strcmp(nom_fonction[i], nom_commande) == 0 ){
       trouver = true;
       fonction f = tableau_fonction[i];
-      int retour = (f)(e->arguments); 
-      //afficher_prompt(retour);
+      (f)(e->arguments); 
       break;
     }
   }
   if(! trouver){
-    int retour;
-    if(fork() == 0){
-      retour = execvp(e->arguments[0], e->arguments );
-      if(retour == -1)
-	fprintf(stderr, "%s : command not found\n", e->arguments[0]);
-      exit(EXIT_FAILURE);
-    }
-    retour = wait(NULL);
-    /*if(retour == -1)
-      afficher_prompt(1);
-    else 
-    afficher_prompt(0);*/
+    execvp(e->arguments[0], e->arguments );
+    perror("exec");
   }
+  return 0;
 }
 
 
@@ -108,7 +136,19 @@ void analyse_cmd(Expression * e){
     executer_cmd(e);
     break;
   case PIPE:
-    tube(e->gauche, e->droite);
+      tube(e->gauche, e->droite);
+    break;
+  case REDIRECTION_O:
+    redirection_stdout(e);
+    break;
+  case REDIRECTION_I:
+    redirection_stdin(e);
+    break;
+  case REDIRECTION_E:
+    redirection_stderr(e);
+    break;
+  case REDIRECTION_A:
+    redirection_stdout_append(e);
     break;
   default:
     printf("Seules les commandes SIMPLES sont executées.\n");
@@ -140,7 +180,7 @@ void afficher_prompt(int retour){
 
 void arbre(Expression * racine){ // parcours infixe
   if(racine != NULL){
-    arbre(racine->gauche); //gauche
+  
 
     switch(racine->type){ // racine
     case VIDE:
@@ -183,6 +223,9 @@ void arbre(Expression * racine){ // parcours infixe
       printf("inconnue ");
       break;
     }
+    
+  arbre(racine->gauche); //gauche
+  
     arbre(racine->droite); // droite
   }
 }

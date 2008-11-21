@@ -16,7 +16,8 @@ int  pwd(char ** arguments){
     {
       ptr = getcwd(buf, (size_t)size);
     }
- printf("%s\n", ptr);
+    printf("%s\n", ptr);
+
  return 0;
 }
 
