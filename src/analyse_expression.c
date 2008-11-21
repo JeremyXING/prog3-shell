@@ -20,6 +20,9 @@ fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins,
 					    killer, times, toexit};
 /*-----------------------------------------------------------------*/
 
+int executer_cmd(Expression * e);
+
+
 int ecrire_history(char ** arguments){
   int argc = 10; //LongueurListe(arguments);
   int fichier = open("history.tmp", O_WRONLY | O_CREAT | O_APPEND, 0644);
@@ -38,8 +41,6 @@ int ecrire_history(char ** arguments){
   close(fichier);  
   return 0;
 }
-
-int executer_cmd(Expression * e);
 
 static void tube(Expression * gauche, Expression * droite){
     int tube[2];
@@ -74,6 +75,10 @@ static void tube(Expression * gauche, Expression * droite){
 
 void redirection_stdout(Expression * e){
   int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+  if(fd == -1){
+    perror(e->arguments[0]);
+    exit(1);
+  }
   dup2(fd, 1);
   analyse_cmd(e->gauche);
   close(fd);
@@ -81,6 +86,10 @@ void redirection_stdout(Expression * e){
 
 void redirection_stdin(Expression * e){
   int fd = open(e->arguments[0], O_RDONLY, 0664);
+  if(fd == -1){
+    perror(e->arguments[0]);
+    exit(1);
+  }
   dup2(fd, 0);
   analyse_cmd(e->gauche);
   close(fd);
@@ -88,6 +97,10 @@ void redirection_stdin(Expression * e){
 
 void redirection_stdout_append(Expression * e){
   int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_APPEND, 0664);
+  if(fd == -1){
+    perror(e->arguments[0]);
+    exit(1);
+  }
   dup2(fd, 1);
   analyse_cmd(e->gauche);
   close(fd);
@@ -95,11 +108,14 @@ void redirection_stdout_append(Expression * e){
 
 void redirection_stderr(Expression * e){
   int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+  if(fd == -1){
+    perror("");
+    exit(1);
+  }
   dup2(fd, 2);
   analyse_cmd(e->gauche);
   close(fd);
 }
-
 
 /*void redirection_stdout_stderr(Expression * e){
   int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_TRUNC, 0664);
@@ -108,7 +124,6 @@ void redirection_stderr(Expression * e){
   analyse_cmd(e->gauche);
   close(fd);
   }*/
-
 
 int executer_cmd(Expression * e){
   bool trouver = false;
@@ -123,11 +138,10 @@ int executer_cmd(Expression * e){
   }
   if(! trouver){
     execvp(e->arguments[0], e->arguments );
-    perror("exec");
+    fprintf(stderr, "%s : command not found\n", e->arguments[0]);
   }
   return 0;
 }
-
 
 void analyse_cmd(Expression * e){
   //ecrire_history(e->arguments);
@@ -156,7 +170,6 @@ void analyse_cmd(Expression * e){
   }
 }
 
-
 void afficher_prompt(int retour){
   char * user = NULL;
   user = getenv("USER");
@@ -176,7 +189,6 @@ void afficher_prompt(int retour){
   
   printf("%s [%s] %d -$ ", user, ptr, retour);
 }
-
 
 void arbre(Expression * racine){ // parcours infixe
   if(racine != NULL){
@@ -224,8 +236,7 @@ void arbre(Expression * racine){ // parcours infixe
       break;
     }
     
-  arbre(racine->gauche); //gauche
-  
+    arbre(racine->gauche); //gauche
     arbre(racine->droite); // droite
   }
 }
