@@ -96,6 +96,7 @@ main (int argc, char **argv)
       Expression * e = ExpressionAnalysee;
       if (fork()==0)
 	analyse_cmd(e);
+      //arbre(e);
       
       
 
