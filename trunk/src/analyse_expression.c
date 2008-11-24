@@ -22,7 +22,6 @@ fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins,
 
 int executer_cmd(Expression * e);
 
-
 int ecrire_history(char ** arguments){
   int argc = 10; //LongueurListe(arguments);
   int fichier = open("history.tmp", O_WRONLY | O_CREAT | O_APPEND, 0644);
@@ -117,6 +116,13 @@ void redirection_stderr(Expression * e){
   close(fd);
 }
 
+void sequence(Expression * e){
+  analyse_cmd(e->gauche);
+  wait(NULL);
+  analyse_cmd(e->droite);
+  wait(NULL);
+}
+
 /*void redirection_stdout_stderr(Expression * e){
   int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_TRUNC, 0664);
   dup2(fd, 0);
@@ -137,8 +143,11 @@ int executer_cmd(Expression * e){
     }
   }
   if(! trouver){
-    execvp(e->arguments[0], e->arguments );
-    fprintf(stderr, "%s : command not found\n", e->arguments[0]);
+    if(fork() == 0){
+      execvp(e->arguments[0], e->arguments );
+      fprintf(stderr, "%s : command not found\n", e->arguments[0]);
+      exit(0);
+    }
   }
   return 0;
 }
@@ -163,6 +172,9 @@ void analyse_cmd(Expression * e){
     break;
   case REDIRECTION_A:
     redirection_stdout_append(e);
+    break;
+  case SEQUENCE:
+    sequence(e);
     break;
   default:
     printf("Seules les commandes SIMPLES sont executées.\n");

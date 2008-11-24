@@ -94,7 +94,7 @@ main (int argc, char **argv)
   while (1){
     if (yyparse () == 0){
       Expression * e = ExpressionAnalysee;
-      if (fork()==0)
+      //if (fork()==0) => voir fichier analyse_expression.c ligne 146
 	analyse_cmd(e);
       //arbre(e);
       
