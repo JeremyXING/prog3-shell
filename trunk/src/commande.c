@@ -62,6 +62,8 @@ int killer(char ** arguments){
 int toexit(char ** arguments){
   printf("Exiting...\n");
   printf("Bye bye !\n");
+  sleep(1);
+  system("clear");
   exit(EXIT_SUCCESS);
 }
 
