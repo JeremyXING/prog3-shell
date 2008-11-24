@@ -18,3 +18,9 @@ A tester :
 Si on supprime le fork() dans le while(1) de Shell.c, les commandes builtins redonnent la main à au ./Shell, parcontre les fonction externes font sortir du programme ./Shell
 
 J'implémenterai la fonction history un peu plus tard (sans bug), et afficher_prompt() necessite avant qu'on regle l'histoire des retours des fonction (bien passé ou non).
+
+
+
+Revision 28:
+Ajout de la fonction qui gere "expression ; expression"
+Modification de l'implementation sur le fork() dans le Shell.c, fonctionne maintenant correctement
