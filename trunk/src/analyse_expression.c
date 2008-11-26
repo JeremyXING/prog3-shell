@@ -15,9 +15,9 @@
 
 /*----------- Tableau des fonctions internes(commande.h) ---------- */
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", 
-				     "kill", "times", "exit" };
+				     "kill", "times", "exit", "pushd", "popd" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, 
-					    killer, times, toexit};
+					    killer, times, toexit, pushd, popd};
 /*-----------------------------------------------------------------*/
 
 int executer_cmd(Expression * e);
@@ -42,33 +42,33 @@ int ecrire_history(char ** arguments){
 }
 
 static void tube(Expression * gauche, Expression * droite){
-    int tube[2];
-    pipe(tube);
-    switch(fork()){
-    case 0://fils
-      close(tube[0]);
-      dup2(tube[1], 1);
-      close(tube[1]);
-      if(gauche->type == SIMPLE){
-	executer_cmd(gauche);
-	exit(1);
-      }
-      else
-	analyse_cmd(gauche);
-      break;
-    default://pere
-      wait(NULL);
-      close(tube[1]);
-      dup2(tube[0],0);
-      close(tube[0]);
-      if(droite->type == SIMPLE){
-	executer_cmd(droite);
-	exit(1);
-      }
-      else
-	analyse_cmd(droite);
-      break;
-    } 
+  int tube[2];
+  pipe(tube);
+  switch(fork()){
+  case 0://fils
+    close(tube[0]);
+    dup2(tube[1], 1);
+    close(tube[1]);
+    if(gauche->type == SIMPLE){
+      executer_cmd(gauche);
+      exit(1);
+    }
+    else
+      analyse_cmd(gauche);
+    break;
+  default://pere
+    wait(NULL);
+    close(tube[1]);
+    dup2(tube[0],0);
+    close(tube[0]);
+    if(droite->type == SIMPLE){
+      executer_cmd(droite);
+      exit(1);
+    }
+    else
+      analyse_cmd(droite);
+    break;
+  }
 }
 
 
@@ -146,7 +146,6 @@ int executer_cmd(Expression * e){
     if(fork() == 0){
       execvp(e->arguments[0], e->arguments );
       fprintf(stderr, "%s : command not found\n", e->arguments[0]);
-      exit(0);
     }
   }
   return 0;
@@ -159,7 +158,7 @@ void analyse_cmd(Expression * e){
     executer_cmd(e);
     break;
   case PIPE:
-      tube(e->gauche, e->droite);
+    tube(e->gauche, e->droite);
     break;
   case REDIRECTION_O:
     redirection_stdout(e);
@@ -204,8 +203,7 @@ void afficher_prompt(int retour){
 
 void arbre(Expression * racine){ // parcours infixe
   if(racine != NULL){
-  
-
+    arbre(racine->gauche); //gauche
     switch(racine->type){ // racine
     case VIDE:
       printf("vide ");
@@ -248,11 +246,18 @@ void arbre(Expression * racine){ // parcours infixe
       break;
     }
     
-    arbre(racine->gauche); //gauche
+
     arbre(racine->droite); // droite
   }
 }
 
 
+void interpreter(Expression * e){
+  //  ecrire_history();
+  //  afficher_prompt();
 
-
+  if(e->type == SIMPLE)
+    analyse_cmd(e);
+  else if(fork() == 0)
+    analyse_cmd(e);
+}

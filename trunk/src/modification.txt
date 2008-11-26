@@ -1,26 +1,4 @@
-Revision 25:
+Revision 30:
+Patch pour éviter la création d'un processus même si la commande executée est simple et builtin
 
-J'ai résolu le problème des multi-pipes, qui fonctionne desormais correctement.
-Par contre j'ai rencontré des soucis de bus-error causé par history et afficher_prompt,
-j'ai donc commenté toutes les fois ou elles apparaissait jusqu'a ce qu'elle soit corrigés.
-
-
-Revision 26:
-
-Pipe récursif avec fonction builtin: ok
-Redirection des entrée, sorties, erreurs: ok
-
-
-
-Revision 27:
-Quelques bidouilles par-ci par-là (ajouts de perror(), de "command not found", etc)
-A tester :
-Si on supprime le fork() dans le while(1) de Shell.c, les commandes builtins redonnent la main à au ./Shell, parcontre les fonction externes font sortir du programme ./Shell
-
-J'implémenterai la fonction history un peu plus tard (sans bug), et afficher_prompt() necessite avant qu'on regle l'histoire des retours des fonction (bien passé ou non).
-
-
-
-Revision 28:
-Ajout de la fonction qui gere "expression ; expression"
-Modification de l'implementation sur le fork() dans le Shell.c, fonctionne maintenant correctement
+Implémentation de popd et pushd (l'écriture pourra peut-être être soignée par la suite...)

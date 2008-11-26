@@ -3,9 +3,13 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <dirent.h>
 
 #include "commande.h"
 #include "analyse_expression.h"
+
+char ** tab_dir = NULL;
+int nb_dir = -1;
 
 int  pwd(char ** arguments){
   long size;
@@ -71,3 +75,51 @@ int times(char ** arguments){
   return 0;
 }
 
+void afficher_pile_dossier(void){
+  if(nb_dir < 0){
+    printf("Pile : [\n");
+    printf("Pile de dossier vide\n");
+  }
+  else{
+    printf("Pile : [");
+    int i;
+    for(i = 0; i <= nb_dir; i++)
+      printf("%s ", tab_dir[i]);
+    printf("\n");
+  }
+}
+
+int pushd(char ** arguments){
+  
+  if(arguments[1] == NULL){
+    fprintf(stderr, "Pas de dossier donné en argument...\n");
+    return 1;
+  }
+
+  if(opendir(arguments[1]) == NULL){
+    fprintf(stderr, "%s : ", arguments[1]);
+    perror("");
+    return 1;
+  }
+
+  nb_dir++;
+  tab_dir = realloc(tab_dir, (nb_dir + 1) * sizeof(char*));
+  tab_dir[nb_dir] = realloc(tab_dir[nb_dir], strlen(arguments[0]) * sizeof(char));
+  strcpy(tab_dir[nb_dir], arguments[1]);
+  
+  afficher_pile_dossier();
+  return 0;
+}
+
+int popd(char ** arguments){
+  if(nb_dir == -1){
+    fprintf(stderr, "Pile de dossier vide\n");
+    return 1;
+  }
+  free(tab_dir[nb_dir]);
+  nb_dir--;
+
+  afficher_pile_dossier();
+
+  return 0;
+}
