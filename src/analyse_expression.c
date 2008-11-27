@@ -22,23 +22,26 @@ fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins,
 /*-----------------------------------------------------------------*/
 
 int executer_cmd(Expression * e);
+void analyse_cmd(Expression * e);
+void arbre(Expression * e);
 
-int ecrire_history(char ** arguments){
-  int argc = 10; //LongueurListe(arguments);
+int ecrire_history(Expression *e){
+
+  longueur = 0;
+  commande = NULL;
+  arbre(e);
+
   int fichier = open("history.tmp", O_WRONLY | O_CREAT | O_APPEND, 0644);
   if(fichier == -1){
     perror("");
     return 1;
   }
-  int i;
-  char * espace = " ";
-  for(i = 0; i < argc; i++){
-    write(fichier, arguments[i], strlen(arguments[i]) * sizeof(char));
-    write(fichier, espace, sizeof(char));
-  }  
-  char * back = "\n";
-  write(fichier, back, sizeof(char));
+
+  write(fichier, commande, strlen(commande) * sizeof(char));
+  write(fichier, "\n", sizeof(char));
+
   close(fichier);  
+  //free(commande);
   return 0;
 }
 
@@ -81,6 +84,7 @@ void redirection_stdout(Expression * e){
   }
   dup2(fd, 1);
   analyse_cmd(e->gauche);
+  analyse_cmd(e->droite);
   close(fd);
 }
 
@@ -92,6 +96,7 @@ void redirection_stdin(Expression * e){
   }
   dup2(fd, 0);
   analyse_cmd(e->gauche);
+  analyse_cmd(e->droite);
   close(fd);
 }
 
@@ -103,6 +108,7 @@ void redirection_stdout_append(Expression * e){
   }
   dup2(fd, 1);
   analyse_cmd(e->gauche);
+  analyse_cmd(e->droite);
   close(fd);
 }
 
@@ -114,6 +120,7 @@ void redirection_stderr(Expression * e){
   }
   dup2(fd, 2);
   analyse_cmd(e->gauche);
+  analyse_cmd(e->droite);
   close(fd);
 }
 
@@ -204,9 +211,9 @@ void afficher_prompt(int retour){
 
 
 
-void arbre_2(Expression * racine){ // parcours infixe
+void arbre(Expression * racine){ // parcours infixe
   if(racine != NULL){
-    arbre_2(racine->gauche); //gauche
+    arbre(racine->gauche); //gauche
     switch(racine->type){ // racine
     case VIDE:
       //printf("vide ");
@@ -215,6 +222,17 @@ void arbre_2(Expression * racine){ // parcours infixe
       longueur += strlen(racine->arguments[0]);
       commande = realloc(commande, (longueur+1)*sizeof(*commande));
       commande = strcat(commande,racine->arguments[0]);
+      commande = strcat(commande, " ");
+
+      int i = 1;
+      while(racine->arguments[i] != NULL){
+	longueur += strlen(racine->arguments[i]);
+	commande = realloc(commande, (longueur + 1)*sizeof(*commande));
+	commande = strcat(commande,racine->arguments[i]);
+	commande = strcat(commande, " ");
+	i++;
+      }
+
       commande = strcat(commande, " ");
       //printf("%s \n", commande);
       break;
@@ -244,23 +262,39 @@ void arbre_2(Expression * racine){ // parcours infixe
       commande = strcat(commande, "| ");
       break;
     case REDIRECTION_I:
-      longueur += 5;
+      longueur += 3 + strlen(racine->arguments[0]);
       commande = realloc(commande, longueur * sizeof(*commande));
-      commande = strcat(commande, "< %s ");
+      commande = strcat(commande, "< ");
+      commande = strcat(commande,racine->arguments[0]);
+      commande = strcat(commande, " ");
       break;
     case REDIRECTION_O:
-      longueur += 5;
+      longueur += (3 + strlen(racine->arguments[0]));
       commande = realloc(commande, longueur * sizeof(*commande));
-      commande = strcat(commande, "> %s ");
+      commande = strcat(commande, "> ");
+      commande = strcat(commande,racine->arguments[0]);
+      commande = strcat(commande, " ");
       break;
     case REDIRECTION_A:
-      printf(">> %s ",racine->arguments[0]);
+      longueur += 4 + strlen(racine->arguments[0]);
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, ">> ");
+      commande = strcat(commande,racine->arguments[0]);
+      commande = strcat(commande, " ");
       break;
     case REDIRECTION_E:
-      printf("2> %s ",racine->arguments[0]);
+      longueur += 4 + strlen(racine->arguments[0]);
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, "2> ");
+      commande = strcat(commande,racine->arguments[0]);
+      commande = strcat(commande, " ");
       break;
     case REDIRECTION_EO:
-      printf("&> %s ",racine->arguments[0]);
+      longueur += 4 + strlen(racine->arguments[0]);
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, "&> ");
+      commande = strcat(commande,racine->arguments[0]);
+      commande = strcat(commande, " ");
       break;
     default:
       printf("inconnue ");
@@ -268,20 +302,12 @@ void arbre_2(Expression * racine){ // parcours infixe
     }
     
 
-    arbre_2(racine->droite); // droite
+    arbre(racine->droite); // droite
   }
 }
 
-void arbre(Expression * e){
-  longueur = 0;
-  commande = NULL;
-  arbre_2(e);
-  printf("%s \n", commande);
-  free(commande);
-}
-
 void interpreter(Expression * e){
-  //  ecrire_history();
+  ecrire_history(e);
   //  afficher_prompt();
 
   if(e->type == SIMPLE)
