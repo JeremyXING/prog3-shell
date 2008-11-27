@@ -10,7 +10,8 @@
 #include "commande.h"
 #include "Shell.h"
 
-
+static char * commande = NULL;
+static int longueur = 0;
 
 
 /*----------- Tableau des fonctions internes(commande.h) ---------- */
@@ -201,36 +202,56 @@ void afficher_prompt(int retour){
   printf("%s [%s] %d -$ ", user, ptr, retour);
 }
 
-void arbre(Expression * racine){ // parcours infixe
+
+
+void arbre_2(Expression * racine){ // parcours infixe
   if(racine != NULL){
-    arbre(racine->gauche); //gauche
+    arbre_2(racine->gauche); //gauche
     switch(racine->type){ // racine
     case VIDE:
-      printf("vide ");
+      //printf("vide ");
       break;
     case SIMPLE:
-      printf("%s ",racine->arguments[0]);
+      longueur += strlen(racine->arguments[0]);
+      commande = realloc(commande, (longueur+1)*sizeof(*commande));
+      commande = strcat(commande,racine->arguments[0]);
+      commande = strcat(commande, " ");
+      //printf("%s \n", commande);
       break;
     case SEQUENCE:
-      printf("; ");
+      longueur += 2;
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, "; ");
       break;
     case SEQUENCE_ET:
-      printf("&& ");
+      longueur += 3;
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, "&& ");
       break;
     case SEQUENCE_OU:
-      printf("|| ");
+      longueur += 3;
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, "|| ");
       break;
     case BG:
-      printf("&");
+      longueur += 1;
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, "&");
       break;
     case PIPE:
-      printf("| ");
+      longueur += 2;
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, "| ");
       break;
     case REDIRECTION_I:
-      printf("< %s ",racine->arguments[0]);
+      longueur += 5;
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, "< %s ");
       break;
     case REDIRECTION_O:
-      printf("> %s ",racine->arguments[0]);
+      longueur += 5;
+      commande = realloc(commande, longueur * sizeof(*commande));
+      commande = strcat(commande, "> %s ");
       break;
     case REDIRECTION_A:
       printf(">> %s ",racine->arguments[0]);
@@ -247,10 +268,17 @@ void arbre(Expression * racine){ // parcours infixe
     }
     
 
-    arbre(racine->droite); // droite
+    arbre_2(racine->droite); // droite
   }
 }
 
+void arbre(Expression * e){
+  longueur = 0;
+  commande = NULL;
+  arbre_2(e);
+  printf("%s \n", commande);
+  free(commande);
+}
 
 void interpreter(Expression * e){
   //  ecrire_history();
