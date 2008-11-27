@@ -95,10 +95,10 @@ main (int argc, char **argv)
     if (yyparse () == 0){
       Expression * e = ExpressionAnalysee;
       //      if (fork()==0) => voir fichier analyse_expression.c ligne 146
-      //interpreter(e);
+      interpreter(e);
       //analyse_cmd(e);
       //printf("arbre : \n");
-      arbre(e);
+      //arbre(e);
       
       /*--------------------------------------------------------------------------------------.
       | L'analyse de la ligne de commande est effectuée sans erreur.  La variable globale     |
