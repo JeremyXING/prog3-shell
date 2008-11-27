@@ -2,3 +2,7 @@ Revision 30:
 Patch pour éviter la création d'un processus même si la commande executée est simple et builtin
 
 Implémentation de popd et pushd (l'écriture pourra peut-être être soignée par la suite...)
+
+
+Revision 32:
+Patch pour history, maintenant entierement fonctionelle. Elle alloue juste la place qui faut, puis free() ensuite.
