@@ -16,9 +16,9 @@ static int longueur = 0;
 
 /*----------- Tableau des fonctions internes(commande.h) ---------- */
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", 
-				     "kill", "times", "exit", "pushd", "popd" };
+				     "kill", "times", "exit", "pushd", "popd", "dirs" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, 
-					    killer, times, toexit, pushd, popd};
+					    killer, times, toexit, pushd, popd, dirs};
 /*-----------------------------------------------------------------*/
 
 int executer_cmd(Expression * e);

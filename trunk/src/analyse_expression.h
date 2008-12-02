@@ -4,7 +4,7 @@
 #include "Shell.h"
 
 
-#define NB_FONCTION 9
+#define NB_FONCTION 10
 
 typedef int pid_t;
 extern char * nom_fonction[NB_FONCTION]; //tableau contenant les noms des fonctions builtin
