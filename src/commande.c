@@ -26,8 +26,8 @@ int  pwd(char ** arguments){
 }
 
 int  cd(char ** arguments){
- int retour = chdir(arguments[1]);
- if(retour == -1){
+  int retour = chdir(arguments[1]);
+  if(retour == -1){
     fprintf(stderr, "%s : Aucun dossier de ce type\n", arguments[1]);
     return 1;
   }
@@ -75,7 +75,7 @@ int times(char ** arguments){
   return 0;
 }
 
-void afficher_pile_dossier(void){
+int dirs(char ** arguments){
   if(nb_dir < 0){
     printf("Pile : [\n");
     printf("Pile de dossier vide\n");
@@ -87,6 +87,7 @@ void afficher_pile_dossier(void){
       printf("%s ", tab_dir[i]);
     printf("\n");
   }
+  return 0;
 }
 
 int pushd(char ** arguments){
@@ -107,7 +108,6 @@ int pushd(char ** arguments){
   tab_dir[nb_dir] = realloc(tab_dir[nb_dir], strlen(arguments[0]) * sizeof(char));
   strcpy(tab_dir[nb_dir], arguments[1]);
   
-  afficher_pile_dossier();
   return 0;
 }
 
@@ -118,8 +118,6 @@ int popd(char ** arguments){
   }
   free(tab_dir[nb_dir]);
   nb_dir--;
-
-  afficher_pile_dossier();
 
   return 0;
 }
