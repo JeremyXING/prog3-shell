@@ -1,6 +1,6 @@
 LEX 	= lex
 YACC 	= yacc -d -v
-CC	= gcc -std=c99 -g -D_POSIX_SOURCE -Wall
+CC	= gcc -std=c99 -g -D_GNU_SOURCE -D_POSIX_SOURCE -Wall
 LIBS	= -lfl
 
 Shell: Shell.o analyse_expression.o commande.o y.tab.o lex.yy.o

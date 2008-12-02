@@ -1,8 +1,9 @@
-Revision 30:
-Patch pour éviter la création d'un processus même si la commande executée est simple et builtin
+Revision 35:
+Implémentation de "dirs" et de "echo".
+echo gere les guillemets, les simples quotes et les $ pour les variables d'environnement stockées dans le fichier ".profile", sous la forme :
+	
+	VAR=contenu de la variable
 
-Implémentation de popd et pushd (l'écriture pourra peut-être être soignée par la suite...)
 
 
-Revision 32:
-Patch pour history, maintenant entierement fonctionelle. Elle alloue juste la place qui faut, puis free() ensuite.
+Il faudra par la suite creer une fonction qui au lancement du Shell, créer un fichier ".profile" (s'il n'existe pas déjà) avec les variables d'env par defaut.
