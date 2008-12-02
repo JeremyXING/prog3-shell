@@ -13,5 +13,6 @@ extern int toexit(char ** arguments);
 extern int pushd(char ** arguments);
 extern int popd(char ** arguments);
 extern int dirs(char ** arguments);
+extern int echo(char ** arguments);
 
 #endif /* COMMANDE_H */
