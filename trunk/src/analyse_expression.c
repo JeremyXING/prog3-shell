@@ -12,7 +12,7 @@
 
 static char * commande = NULL;
 static int longueur = 0;
-
+int status;
 
 /*----------- Tableau des fonctions internes(commande.h) ---------- */
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", 
@@ -138,22 +138,55 @@ void sequence(Expression * e){
   close(fd);
   }*/
 
+
+void sequence_et(Expression * e)
+{
+  analyse_cmd(e->gauche);
+  if(status == 0 )
+    {
+      interpreter(e->droite);
+      
+    } 
+  else
+    {
+      //rien
+    }
+}
+
+void sequence_ou(Expression * e)
+{
+  analyse_cmd(e->gauche);
+  if(status != 0 )
+    {
+      interpreter(e->droite);
+      
+    } 
+  else
+    {
+      //rien
+    }
+}
+
+
 int executer_cmd(Expression * e){
   bool trouver = false;
   char * nom_commande = e->arguments[0];
+  int pid;
   for(int i=0; i < NB_FONCTION; i++){
     if( strcmp(nom_fonction[i], nom_commande) == 0 ){
       trouver = true;
       fonction f = tableau_fonction[i];
-      (f)(e->arguments); 
+      status= (f)(e->arguments); 
       break;
     }
   }
   if(! trouver){
-    if(fork() == 0){
+    if((pid= fork()) == 0){
       execvp(e->arguments[0], e->arguments );
       fprintf(stderr, "%s : command not found\n", e->arguments[0]);
+      exit(1);
     }
+    waitpid(pid,&status, 0);
   }
   return 0;
 }
@@ -182,6 +215,12 @@ void analyse_cmd(Expression * e){
   case SEQUENCE:
     sequence(e);
     break;
+  case SEQUENCE_ET:
+    sequence_et(e);
+    break;
+  case SEQUENCE_OU:
+    sequence_ou(e);
+    break; 
   default:
     printf("Seules les commandes SIMPLES sont executées.\n");
     break;
@@ -303,8 +342,10 @@ void arbre(Expression * racine){ // parcours infixe
 void interpreter(Expression * e){
   ecrire_history(e);
   //  afficher_prompt();
-  if(e->type == SIMPLE)
+  if(e->type == SIMPLE || e->type == SEQUENCE_ET )
     analyse_cmd(e);
+  
   else if(fork() == 0)
-    analyse_cmd(e);
+    
+      analyse_cmd(e);
 }
