@@ -141,7 +141,6 @@ main (int argc, char **argv)
     }
     else {
       /* L'analyse de la ligne de commande a donné une erreur */
-      afficher_prompt(1);
     }
   }
   return 0;
