@@ -90,7 +90,7 @@ int
 main (int argc, char **argv) 
 {
   system("clear");
-  //  afficher_prompt(0);
+  initialiser_fichier();
   while (1){
     if (yyparse () == 0){
       Expression * e = ExpressionAnalysee;

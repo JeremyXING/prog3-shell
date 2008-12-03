@@ -126,6 +126,11 @@ int popd(char ** arguments){
 
 static int lire_contenu_variable(const char* variable_env){
 
+  if(strcmp(variable_env, "?") == 0){
+    printf("%d\n", status);
+    return 0;
+  }
+
   ssize_t taille_ligne;
   size_t len = 0;
   char * ligne = NULL;
@@ -161,6 +166,7 @@ static int lire_contenu_variable(const char* variable_env){
 }
 
 int echo(char ** arguments){
+  int retour = 0;
   if(LongueurListe(arguments) == 1)
     return 0;
   else{
@@ -168,7 +174,7 @@ int echo(char ** arguments){
     for(i = 1; i < LongueurListe(arguments); i++)//pour chaque arguments
       switch(arguments[i][0]){
       case '$':
-	lire_contenu_variable(arguments[i]+1);
+	retour = lire_contenu_variable(arguments[i]+1);
 	break;
       case '\"':
 	printf("%s\n", strndup(arguments[i]+1, strlen(arguments[i])-2));
@@ -181,5 +187,5 @@ int echo(char ** arguments){
 	break;
       }
   }
-  return 0;
+  return retour;
 }
