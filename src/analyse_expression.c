@@ -32,6 +32,7 @@ int ecrire_history(Expression *e){
   arbre(e);
 
   int fichier = open("history.tmp", O_WRONLY | O_CREAT | O_APPEND, 0644);
+
   if(fichier == -1){
     perror("");
     return 1;
@@ -42,7 +43,7 @@ int ecrire_history(Expression *e){
 
   close(fichier);  
   free(commande);
-  return 0;
+    return 0;
 }
 
 static void tube(Expression * gauche, Expression * droite){
@@ -339,8 +340,7 @@ int initialiser_fichier(void){
 
     char * var_user = "USER=";
     char * var_pwd = "PWD=";
-
-    
+        
     fwrite(var_pwd, strlen(var_pwd) * sizeof(char), 1, fichier);
     fwrite(ptr, strlen(ptr) * sizeof(char), 1, fichier);
     fwrite(retour, strlen(retour) * sizeof(char), 1, fichier);
@@ -356,7 +356,7 @@ int initialiser_fichier(void){
 }
 
 void interpreter(Expression * e){
-  ecrire_history(e);
+  //  ecrire_history(e);
   //  afficher_prompt();
   if(e->type == SIMPLE || e->type == SEQUENCE_ET || e->type == SEQUENCE_OU || e->type == SEQUENCE)
     analyse_cmd(e);
