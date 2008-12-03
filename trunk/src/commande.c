@@ -32,7 +32,8 @@ int  cd(char ** arguments){
     fprintf(stderr, "%s : Aucun dossier de ce type\n", arguments[1]);
     return 1;
   }
-  else return 0;
+  else
+    return 0;
 }
 
 int history(char ** arguments){
