@@ -23,7 +23,8 @@ int  pwd(char ** arguments){
     }
     printf("%s\n", ptr);
 
- return 0;
+    free(buf);
+    return 0;
 }
 
 int  cd(char ** arguments){
@@ -32,11 +33,48 @@ int  cd(char ** arguments){
     fprintf(stderr, "%s : Aucun dossier de ce type\n", arguments[1]);
     return 1;
   }
-  else
-    return 0;
+  
+  /*
+  long size;
+  char *buf;
+  char *ptr;
+  size = pathconf(".", _PC_PATH_MAX);
+  if ((buf = (char *)malloc((size_t)size)) != NULL)
+    {
+      ptr = getcwd(buf, (size_t)size);
+    }
+  free(buf);
+
+  char * chemin_fichier = malloc((strlen(ptr) + strlen(".profile")) * sizeof(char));
+  strcpy(chemin_fichier, ptr);
+  strcat(chemin_fichier, ".profile");
+  printf("%s\n", chemin_fichier);
+  FILE * fichier = fopen(chemin_fichier, "r+");
+  
+  free(chemin_fichier);
+
+  if(fichier == NULL){
+    fprintf(stderr, "Fichier \".profile\" introuvable\n");
+    return 1;
+   }
+
+   char * buffer = malloc(64 * sizeof(char));
+   char * save = buffer;
+
+   while((retour = fscanf(fichier, "%s", buffer)) != EOF)
+     {
+       if(strncmp(buffer, "PWD=", strlen("PWD=")) == 0){
+	 printf("%s\n", strrchr(buffer, '=')+1);
+	 break;
+       }
+     }
+   free(save);
+   fclose(fichier);*/
+   return 0;
 }
 
 int history(char ** arguments){
+
   FILE * fichier;
   fichier = fopen("history.tmp", "r");
   if(fichier == NULL){
@@ -126,44 +164,41 @@ int popd(char ** arguments){
 
 static int lire_contenu_variable(const char* variable_env){
 
-  if(strcmp(variable_env, "?") == 0){
-    printf("%d\n", status);
-    return 0;
-  }
+   if(strcmp(variable_env, "?") == 0){
+     printf("%d", status);
+     return 0;
+   }
 
-  ssize_t taille_ligne;
-  size_t len = 0;
-  char * ligne = NULL;
+   FILE * fichier = fopen(".profile", "r");
 
-  int longueur = strlen(variable_env);
+   if(fichier == NULL){
+     perror(".profile");
+     return 1;
+   }
 
-  FILE * fichier = fopen(".profile", "r");
-  if(fichier == NULL){
-    perror(".profile");
-    return 1;
-  }
-  
-  int numero_ligne = 1;
-  while ((taille_ligne = getline(&ligne, &len, fichier)) != -1) {
+   char * buffer = malloc(64 * sizeof(char));
+   char * save = buffer;
+   size_t len = strlen(variable_env);
+   int retour;
 
-    if(strncmp(variable_env, ligne, longueur) == 0){
-      printf("%s", strrchr(ligne, '=')+1);
-      break;
-    }
-    numero_ligne++;
-  }
+   while((retour = fscanf(fichier, "%s", buffer)) != EOF)
+     {
+       if(strncmp(buffer, variable_env, len) == 0){
+	 printf("%s\t", strrchr(buffer, '=')+1);
+	 break;
+       }
+     } 
 
-  if(taille_ligne == -1){
-    fprintf(stderr, "Variable %s inexistante !\n", variable_env);
-    return 1;
-  }
-  
-  if (ligne)
-    free(ligne);
+   if(retour == EOF){
+     fprintf(stderr, "Variable %s inexistante !", variable_env);
+     free(save);
+     return 1;
+   }
 
-  fclose(fichier);
-  return 0;
-}
+   free(save);
+   fclose(fichier);
+   return 0;
+ }
 
 int echo(char ** arguments){
   int retour = 0;
@@ -177,15 +212,16 @@ int echo(char ** arguments){
 	retour = lire_contenu_variable(arguments[i]+1);
 	break;
       case '\"':
-	printf("%s\n", strndup(arguments[i]+1, strlen(arguments[i])-2));
+	printf("%s ", strndup(arguments[i]+1, strlen(arguments[i])-2));
 	break;
       case '\'':
-	printf("%s\n", strndup(arguments[i]+1, strlen(arguments[i])-2));
+	printf("%s ", strndup(arguments[i]+1, strlen(arguments[i])-2));
 	break;
       default:
-	printf("%s\n", arguments[i]);
+	printf("%s ", arguments[i]);
 	break;
       }
   }
+  printf("\n");
   return retour;
 }
