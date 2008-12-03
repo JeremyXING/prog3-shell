@@ -144,7 +144,7 @@ void sequence_et(Expression * e)
   analyse_cmd(e->gauche);
   if(status == 0 )
     {
-      interpreter(e->droite);
+      analyse_cmd(e->droite);
       
     } 
   else
@@ -158,7 +158,7 @@ void sequence_ou(Expression * e)
   analyse_cmd(e->gauche);
   if(status != 0 )
     {
-      interpreter(e->droite);
+      analyse_cmd(e->droite);
       
     } 
   else
@@ -228,23 +228,8 @@ void analyse_cmd(Expression * e){
 }
 
 void afficher_prompt(int retour){
-  char * user = NULL;
-  user = getenv("USER");
-  if(user == NULL)
-    user = "unknown_user";
-  long size;
-  char *buf;
-  char *ptr;
-  size = pathconf(".", _PC_PATH_MAX);
-  if ((buf = (char *)malloc((size_t)size)) != NULL)
-    {
-      ptr = getcwd(buf, (size_t)size);
-    }
-  if(retour == 1)
-    retour = 1;
-  else retour = 0;
-  
-  printf("%s [%s] %d -$ ", user, ptr, retour);
+
+  //printf("%s [%s] %d -$ ", user, ptr, retour);
 }
 
 
@@ -339,8 +324,56 @@ void arbre(Expression * racine){ // parcours infixe
   }
 }
 
+int initialiser_fichier(void){
+  
+  FILE * fichier = fopen(".profile", "r");
+
+  if(fichier != NULL)
+    return 0;
+  else {
+    fichier = fopen(".profile", "a+");
+
+    /*CODE PWD*/
+    long size;
+    char *buf;
+    char *ptr;
+    size = pathconf(".", _PC_PATH_MAX);
+    if ((buf = (char *)malloc((size_t)size)) != NULL)
+     	ptr = getcwd(buf, (size_t)size);
+    /*FIN CODE PWD*/
+
+    /*CODE USER*/
+    char * user = NULL;
+    user = getenv("USER");
+    if(user == NULL)
+      strcpy(user, "unknown_user");
+    /*FIN CODE USER*/
+
+    char * retour = "\n";
+
+    char * var_user = "USER=";
+    char * var_pwd = "PWD=";
+
+    
+    fwrite(var_pwd, strlen(var_pwd) * sizeof(char), 1, fichier);
+    fwrite(ptr, strlen(ptr) * sizeof(char), 1, fichier);
+    fwrite(retour, strlen(retour) * sizeof(char), 1, fichier);
+
+    fwrite(var_user, strlen(var_user) * sizeof(char), 1, fichier);
+    fwrite(user, strlen(user) * sizeof(char), 1, fichier);
+    fwrite(retour, strlen(retour) * sizeof(char), 1, fichier);
+    
+    free(buf);
+  }
+
+  
+  fclose(fichier);
+  return 0;
+}
+
 void interpreter(Expression * e){
   ecrire_history(e);
+  initialiser_fichier();
   //  afficher_prompt();
   if(e->type == SIMPLE || e->type == SEQUENCE_ET )
     analyse_cmd(e);
