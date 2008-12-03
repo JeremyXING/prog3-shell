@@ -138,35 +138,23 @@ void sequence(Expression * e){
   close(fd);
   }*/
 
-
 void sequence_et(Expression * e)
 {
-  analyse_cmd(e->gauche);
-  if(status == 0 )
-    {
-      analyse_cmd(e->droite);
-      
-    } 
-  else
-    {
-      //rien
-    }
+  interpreter(e->gauche);
+  wait(NULL);
+  if(status == 0 ){
+    interpreter(e->droite);
+    //wait(NULL);
+  }
 }
 
 void sequence_ou(Expression * e)
 {
-  analyse_cmd(e->gauche);
+  interpreter(e->gauche);
+  wait(NULL);
   if(status != 0 )
-    {
-      analyse_cmd(e->droite);
-      
-    } 
-  else
-    {
-      //rien
-    }
+      interpreter(e->droite);
 }
-
 
 int executer_cmd(Expression * e){
   bool trouver = false;
@@ -176,12 +164,12 @@ int executer_cmd(Expression * e){
     if( strcmp(nom_fonction[i], nom_commande) == 0 ){
       trouver = true;
       fonction f = tableau_fonction[i];
-      status= (f)(e->arguments); 
+      status = (f)(e->arguments);
       break;
     }
   }
   if(! trouver){
-    if((pid= fork()) == 0){
+    if((pid = fork()) == 0){
       execvp(e->arguments[0], e->arguments );
       fprintf(stderr, "%s : command not found\n", e->arguments[0]);
       exit(1);
@@ -227,12 +215,9 @@ void analyse_cmd(Expression * e){
   }
 }
 
-void afficher_prompt(int retour){
-
+void afficher_prompt(void){
   //printf("%s [%s] %d -$ ", user, ptr, retour);
 }
-
-
 
 void arbre(Expression * racine){ // parcours infixe
   if(racine != NULL){
@@ -326,12 +311,11 @@ void arbre(Expression * racine){ // parcours infixe
 
 int initialiser_fichier(void){
   
-  FILE * fichier = fopen(".profile", "r");
+  FILE * fichier = fopen(".profile", "w+");
 
-  if(fichier != NULL)
+  if(fichier == NULL)
     return 0;
   else {
-    fichier = fopen(".profile", "a+");
 
     /*CODE PWD*/
     long size;
@@ -342,12 +326,14 @@ int initialiser_fichier(void){
      	ptr = getcwd(buf, (size_t)size);
     /*FIN CODE PWD*/
 
+
     /*CODE USER*/
     char * user = NULL;
     user = getenv("USER");
     if(user == NULL)
       strcpy(user, "unknown_user");
     /*FIN CODE USER*/
+
 
     char * retour = "\n";
 
@@ -365,20 +351,15 @@ int initialiser_fichier(void){
     
     free(buf);
   }
-
-  
   fclose(fichier);
   return 0;
 }
 
 void interpreter(Expression * e){
   ecrire_history(e);
-  initialiser_fichier();
   //  afficher_prompt();
-  if(e->type == SIMPLE || e->type == SEQUENCE_ET )
+  if(e->type == SIMPLE || e->type == SEQUENCE_ET || e->type == SEQUENCE_OU || e->type == SEQUENCE)
     analyse_cmd(e);
-  
   else if(fork() == 0)
-    
-      analyse_cmd(e);
+    analyse_cmd(e);
 }
