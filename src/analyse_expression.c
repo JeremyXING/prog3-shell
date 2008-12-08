@@ -14,11 +14,13 @@ static char * commande = NULL;
 static int longueur = 0;
 int status;
 
+char * home = NULL;
+
 /*----------- Tableau des fonctions internes(commande.h) ---------- */
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", 
 				     "kill", "times", "exit", "pushd", "popd", "dirs", "echo" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, 
-					    killer, times, toexit, pushd, popd, dirs, echo};
+					    killer, times_, toexit, pushd, popd, dirs, echo};
 /*-----------------------------------------------------------------*/
 
 int executer_cmd(Expression * e);
@@ -158,6 +160,9 @@ void sequence_ou(Expression * e)
 }
 
 int executer_cmd(Expression * e){
+
+  
+
   bool trouver = false;
   char * nom_commande = e->arguments[0];
   int pid;
@@ -311,6 +316,20 @@ void arbre(Expression * racine){ // parcours infixe
 }
 
 int initialiser_fichier(void){
+
+  long size;
+  char *buf;
+  char *ptr;
+  size = pathconf(".", _PC_PATH_MAX);
+  if ((buf = (char *)malloc((size_t)size)) != NULL)
+    {
+      ptr = getcwd(buf, (size_t)size);
+    }
+  free(buf);
+  
+  home = malloc(strlen(ptr) * sizeof(char));
+  home = strcpy(home, ptr);
+  //free(ptr);
   
   FILE * fichier = fopen(".profile", "w+");
 
