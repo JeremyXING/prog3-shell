@@ -20,7 +20,7 @@ char * home = NULL;
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", 
 				     "kill", "times", "exit", "pushd", "popd", "dirs", "echo" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, 
-					    killer, times_, toexit, pushd, popd, dirs, echo};
+					    kill_, times_, toexit, pushd, popd, dirs, echo};
 /*-----------------------------------------------------------------*/
 
 int executer_cmd(Expression * e);

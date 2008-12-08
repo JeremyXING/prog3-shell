@@ -242,7 +242,7 @@ static int lire_contenu_variable(const char* variable_env){
  }
 
 int echo(char ** arguments){
-  int retour = 0;
+  /*  int retour = 0;
   if(LongueurListe(arguments) == 1)
     return 0;
   else{
@@ -264,63 +264,52 @@ int echo(char ** arguments){
       }
   }
   printf("\n");
-  return retour;
+  return retour;*/
+  return 0;
 }
 
-static char * minuscule(const char * s){
-  int taille = strlen(s);
-  char * min = malloc(taille * sizeof(*min));
-  for(int i=0; i < taille; i++)
-    min[i] = tolower(s[i]);
-  return min;
-}
+static char * tab_signame[32] = {"SIGNAL 0", "SIGHUP", "SIGINT", "SIGQUIT", "SIGILL", "SIGTRAP",
+				 "SIGABRT", "SIGEMT", "SIGFPE", "SIGKILL", "SIGBUS","SIGSEGV",
+				 "SIGSYS", "SIGPIPE", "SIGALRM", "SIGTERM", "SIGURG", "SIGSTOP",
+				 "SIGTSTP", "SIGCONT", "SIGCHLD", "SIGTTIN", "SIGTTOU", "SIGIO",
+				 "SIGXCPU", "SIGXFSZ", "SIGVTALRM", "SIGPROF", "SIGWINCH", "SIGINFO",
+				 "SIGUSR1", "SIGUSR2"};
 
-static char * majuscule(const char * s){
-  int taille = strlen(s);
-  char * min = malloc(taille * sizeof(*min));
-  for(int i=0; i < taille; i++)
-    min[i] = toupper(s[i]);
-  return min;
-}
+#define NB_SIG  32
+
 
 static int kill_no_signal(char * sig){
   if(atoi(sig) != 0)
     return atoi(sig);
-  int i=1;
-  sig = minuscule(sig)+3;
-  while(i < NSIG){
-    if(strcmp(sig, strsignal(i)) == 0)
+  for(int i=1; i < NB_SIG; i++)
+    if( strcmp(sig, tab_signame[i]) == 0 )
       return i;
-    i++;
-  }
   printf("Signal inexistant.\n");
   return -1;
-  
+
 }
 
 static void kill_usage(void){
-  printf("Usage: kill [-s sigspec | -n signum | -sigspec] pid\n       kill -l [sigspec]\n");
+ printf("usage: kill [-s sigspec | -n signum | -sigspec] pid or kill -l [sigspec]");
 }
 
 void kill_liste_signaux(void){
-  int i,j;
-  for(i=1, j=1; i < NSIG; i++, j++){
-    printf("%2d) %s\t\t", i, majuscule(strsignal(i)));
-    if(j == 4){
-      printf("\n");
-      j=1;
-    }
-  }
-  printf("\n");
+	int i,j;
+	for(i=1, j=1; i < NSIG; i++, j++){
+	  printf("%2d) %s\t", i, tab_signame[i]);
+		if(j == 4){
+			printf("\n");
+			j=1;
+		}
+	}
+	printf("\n");
 }
 
-int killer(char ** arguments){
-  int signal_default = SIGTERM;
+int kill_(char ** arguments){
+  int signal_default = 15;
   int argc = LongueurListe(arguments);
-  if(argc < 2){
+  if(argc < 2)
     kill_usage();
-    return 1;
-  }
   switch(argc){
   case 2:
     if(strcmp(arguments[1], "-l") == 0)
@@ -329,10 +318,10 @@ int killer(char ** arguments){
       kill(atoi(arguments[argc-1]), signal_default);
     break;
   case 3:
-    if(arguments[1][0] == '-')
-      kill(atoi(arguments[argc-1]), kill_no_signal(arguments[1]+1));
+  	if(arguments[1][0] == '-')
+    	kill(atoi(arguments[argc-1]), kill_no_signal(arguments[1]+1));
     else
-      kill_usage();
+    	kill_usage();
     break;
   case 4:
     if(strcmp(arguments[1], "-s") == 0 || strcmp(arguments[1], "-n") == 0)
@@ -340,8 +329,8 @@ int killer(char ** arguments){
     else
       kill_usage();
     break;
-  default:
-    kill_usage();
+   default:
+   	kill_usage();
   }
   return 0;
 }
