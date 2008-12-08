@@ -6,6 +6,10 @@
 #include <dirent.h>
 #include <string.h>
 #include <ctype.h>
+#include <fcntl.h>
+#include <sys/times.h>
+#include <stdbool.h>
+#include <sys/wait.h>
 
 #include "commande.h"
 #include "analyse_expression.h"
@@ -107,7 +111,42 @@ int toexit(char ** arguments){
   exit(EXIT_SUCCESS);
 }
 
-int times(char ** arguments){
+int times_(char ** arguments){
+
+  struct tms *buf = malloc(sizeof(struct tms));
+
+  clock_t top = times(buf);
+
+  printf("huhu\n");
+
+  bool trouver = false;
+  char * nom_commande = arguments[1];
+  int pid;
+  for(int i=0; i < NB_FONCTION; i++){
+    if( strcmp(nom_fonction[i], nom_commande) == 0 ){
+      trouver = true;
+      fonction f = tableau_fonction[i];
+      status = (f)(arguments);
+      break;
+    }
+  }
+  if(! trouver){
+    if((pid = fork()) == 0){
+      execvp(arguments[1], arguments );
+      fprintf(stderr, "%s : command not found\n", arguments[1]);
+      exit(1);
+    }
+    waitpid(pid,&status, 0);
+  }
+
+  clock_t stop = times(buf);
+  printf("hoho\n");
+
+  //  printf("%d\n", (int)(stop - top));
+  /*  struct tms *buf = malloc(sizeof(struct tms));
+  times(buf);
+  printf("%d\n", (int)buf->tms_utime);*/
+
   return 0;
 }
 
@@ -164,11 +203,17 @@ static int lire_contenu_variable(const char* variable_env){
      printf("%d", status);
      return 0;
    }
+   
+   char * chemin_fichier = malloc((strlen(home) + strlen("/.profile")) * sizeof(char));
+   strcpy(chemin_fichier, home);
+   strcat(chemin_fichier, "/.profile");
 
-   FILE * fichier = fopen(".profile", "r");
+   printf("Chemin : %s\n", chemin_fichier);
+
+   FILE * fichier = fopen(chemin_fichier, "r");
 
    if(fichier == NULL){
-     perror(".profile");
+     perror(chemin_fichier);
      return 1;
    }
 
