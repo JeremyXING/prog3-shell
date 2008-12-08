@@ -113,40 +113,6 @@ int toexit(char ** arguments){
 
 int times_(char ** arguments){
 
-  struct tms *buf = malloc(sizeof(struct tms));
-
-  clock_t top = times(buf);
-
-  printf("huhu\n");
-
-  bool trouver = false;
-  char * nom_commande = arguments[1];
-  int pid;
-  for(int i=0; i < NB_FONCTION; i++){
-    if( strcmp(nom_fonction[i], nom_commande) == 0 ){
-      trouver = true;
-      fonction f = tableau_fonction[i];
-      status = (f)(arguments);
-      break;
-    }
-  }
-  if(! trouver){
-    if((pid = fork()) == 0){
-      execvp(arguments[1], arguments );
-      fprintf(stderr, "%s : command not found\n", arguments[1]);
-      exit(1);
-    }
-    waitpid(pid,&status, 0);
-  }
-
-  clock_t stop = times(buf);
-  printf("hoho\n");
-
-  //  printf("%d\n", (int)(stop - top));
-  /*  struct tms *buf = malloc(sizeof(struct tms));
-  times(buf);
-  printf("%d\n", (int)buf->tms_utime);*/
-
   return 0;
 }
 
@@ -204,16 +170,16 @@ static int lire_contenu_variable(const char* variable_env){
      return 0;
    }
    
-   char * chemin_fichier = malloc((strlen(home) + strlen("/.profile")) * sizeof(char));
+   /*   char * chemin_fichier = malloc((strlen(home) + strlen("/.profile")) * sizeof(char));
    strcpy(chemin_fichier, home);
    strcat(chemin_fichier, "/.profile");
 
-   printf("Chemin : %s\n", chemin_fichier);
+   printf("Chemin : %s\n", chemin_fichier);*/
 
-   FILE * fichier = fopen(chemin_fichier, "r");
+   FILE * fichier = fopen(".profile", "r");
 
    if(fichier == NULL){
-     perror(chemin_fichier);
+     perror(".profile");
      return 1;
    }
 
@@ -242,21 +208,28 @@ static int lire_contenu_variable(const char* variable_env){
  }
 
 int echo(char ** arguments){
-  /*  int retour = 0;
+  int retour = 0;
   if(LongueurListe(arguments) == 1)
     return 0;
   else{
     int i;
+    char * buf = NULL;
     for(i = 1; i < LongueurListe(arguments); i++)//pour chaque arguments
       switch(arguments[i][0]){
       case '$':
 	retour = lire_contenu_variable(arguments[i]+1);
 	break;
       case '\"':
-	printf("%s ", strndup(arguments[i]+1, strlen(arguments[i])-2));
+	buf = malloc((strlen(arguments[i])-2) * sizeof(char));
+	buf = strncpy(buf, arguments[i]+2, strlen(arguments[i])-3);
+	retour = lire_contenu_variable(buf);
+	free(buf);
 	break;
       case '\'':
-	printf("%s ", strndup(arguments[i]+1, strlen(arguments[i])-2));
+	buf = malloc((strlen(arguments[i])-2) * sizeof(char));
+	buf = strncpy(buf, arguments[i]+1, strlen(arguments[i])-2);
+	printf("%s ", buf);
+	free(buf);
 	break;
       default:
 	printf("%s ", arguments[i]);
@@ -264,7 +237,7 @@ int echo(char ** arguments){
       }
   }
   printf("\n");
-  return retour;*/
+  return retour;
   return 0;
 }
 
@@ -290,12 +263,13 @@ static int kill_no_signal(char * sig){
 }
 
 static void kill_usage(void){
- printf("usage: kill [-s sigspec | -n signum | -sigspec] pid or kill -l [sigspec]");
+  printf("Usage: kill [-s sigspec | -n signum | -sigspec] pid\n");
+  printf("       kill -l [sigspec]\n");
 }
 
 void kill_liste_signaux(void){
 	int i,j;
-	for(i=1, j=1; i < NSIG; i++, j++){
+	for(i=1, j=1; i < NB_SIG; i++, j++){
 	  printf("%2d) %s\t", i, tab_signame[i]);
 		if(j == 4){
 			printf("\n");
@@ -329,8 +303,6 @@ int kill_(char ** arguments){
     else
       kill_usage();
     break;
-   default:
-   	kill_usage();
   }
   return 0;
 }
