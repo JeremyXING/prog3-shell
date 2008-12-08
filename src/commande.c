@@ -259,50 +259,55 @@ static int kill_no_signal(char * sig){
       return i;
   printf("Signal inexistant.\n");
   return -1;
-
+  
 }
 
-static void kill_usage(void){
+static int kill_usage(void){
   printf("Usage: kill [-s sigspec | -n signum | -sigspec] pid\n");
   printf("       kill -l [sigspec]\n");
+  return 1;
 }
 
 void kill_liste_signaux(void){
-	int i,j;
-	for(i=1, j=1; i < NB_SIG; i++, j++){
-	  printf("%2d) %s\t", i, tab_signame[i]);
-		if(j == 4){
-			printf("\n");
-			j=1;
-		}
-	}
-	printf("\n");
+  int i,j;
+  for(i=1, j=1; i < NB_SIG; i++, j++){
+    printf("%2d) %s\t", i, tab_signame[i]);
+    if(j == 4){
+      printf("\n");
+      j=1;
+    }
+  }
+  printf("\n");
 }
 
 int kill_(char ** arguments){
+  int retour = 0;
   int signal_default = 15;
   int argc = LongueurListe(arguments);
   if(argc < 2)
-    kill_usage();
+    retour = kill_usage();
   switch(argc){
   case 2:
     if(strcmp(arguments[1], "-l") == 0)
       kill_liste_signaux();
     else
-      kill(atoi(arguments[argc-1]), signal_default);
+      if(atoi(arguments[argc-1]) != 0)
+	retour = kill(atoi(arguments[argc-1]), signal_default);
+      else
+	retour = kill_usage();
     break;
   case 3:
-  	if(arguments[1][0] == '-')
-    	kill(atoi(arguments[argc-1]), kill_no_signal(arguments[1]+1));
+    if(arguments[1][0] == '-')
+      retour = kill(atoi(arguments[argc-1]), kill_no_signal(arguments[1]+1));
     else
-    	kill_usage();
+      retour = kill_usage();
     break;
   case 4:
     if(strcmp(arguments[1], "-s") == 0 || strcmp(arguments[1], "-n") == 0)
-      kill(atoi(arguments[argc-1]), kill_no_signal(arguments[2]));
+      retour = kill(atoi(arguments[argc-1]), kill_no_signal(arguments[2]));
     else
-      kill_usage();
+      retour = kill_usage();
     break;
   }
-  return 0;
+  return abs(retour);
 }
