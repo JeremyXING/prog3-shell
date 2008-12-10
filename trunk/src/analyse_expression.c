@@ -18,9 +18,9 @@ char * home = NULL;
 
 /*----------- Tableau des fonctions internes(commande.h) ---------- */
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", 
-				     "kill", "times", "exit", "pushd", "popd", "dirs", "echo", "alias" };
+				     "kill", "times", "exit", "pushd", "popd", "dirs", "echo", "alias", "printenv" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, 
-					    kill_, times_, toexit, pushd, popd, dirs, echo, alias_};
+					    kill_, times_, toexit, pushd, popd, dirs, echo, alias_, printenv};
 /*-----------------------------------------------------------------*/
 
 int executer_cmd(Expression * e);
@@ -365,12 +365,16 @@ int initialiser_fichier(void){
   home = malloc(strlen(ptr) * sizeof(char));
   home = memcpy(home, ptr, strlen(ptr) * sizeof(char));
 
-  FILE * fichier = fopen(".profile", "w+");
+  FILE * fichier = fopen(".profile", "r");
 
-  if(fichier == NULL)
+  if(fichier != NULL){
+    fclose(fichier);
+    char * arguments[2] = {"", "."};
+    cd(arguments);
     return 0;
+  }
   else {
-
+    FILE * fichier = fopen(".profile", "w+");
     /*CODE PWD*/
     long size;
     char *buf;
@@ -393,18 +397,26 @@ int initialiser_fichier(void){
 
     char * var_user = "USER=";
     char * var_pwd = "PWD=";
+    char * var_home = "HOME=";
         
+    
+    fwrite(var_user, strlen(var_user) * sizeof(char), 1, fichier);
+    fwrite(user, strlen(user) * sizeof(char), 1, fichier);
+    fwrite(retour, strlen(retour) * sizeof(char), 1, fichier);
+
+    fwrite(var_home, strlen(var_home) * sizeof(char), 1, fichier);
+    fwrite(home, strlen(home) * sizeof(char), 1, fichier);
+    fwrite(retour, strlen(retour) * sizeof(char), 1, fichier);
+
     fwrite(var_pwd, strlen(var_pwd) * sizeof(char), 1, fichier);
     fwrite(ptr, strlen(ptr) * sizeof(char), 1, fichier);
     fwrite(retour, strlen(retour) * sizeof(char), 1, fichier);
 
-    fwrite(var_user, strlen(var_user) * sizeof(char), 1, fichier);
-    fwrite(user, strlen(user) * sizeof(char), 1, fichier);
-    fwrite(retour, strlen(retour) * sizeof(char), 1, fichier);
     
     free(buf);
+    fclose(fichier);
+    return 0;
   }
-  fclose(fichier);
   return 0;
 }
 
