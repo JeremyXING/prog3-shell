@@ -84,7 +84,7 @@ expression	:
 		    {
   		      $$ = $2;
 		    }
-		;
+                ;
 
 fichier		: IDENTIFICATEUR
 		    {
