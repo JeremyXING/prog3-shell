@@ -4,7 +4,7 @@
 #include "Shell.h"
 
 
-#define NB_FONCTION 11
+#define NB_FONCTION 12
 
 typedef int (*fonction)(char **); 
 

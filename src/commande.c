@@ -430,7 +430,7 @@ int alias_(char ** arguments){
   int argc = LongueurListe(arguments);
   alias a;
   int pos;
-  if(argc == 0)
+  if(argc == 1)
     alias_afficherAlias();
   else
     for(int i=1; i<argc; i++){
