@@ -133,13 +133,14 @@ void sequence(Expression * e){
   wait(NULL);
 }
 
-/*void redirection_stdout_stderr(Expression * e){
+void redirection_stdout_stderr(Expression * e){
   int fd = open(e->arguments[0], O_CREAT | O_WRONLY | O_TRUNC, 0664);
-  dup2(fd, 0);
+  dup2(fd, 1);
   dup2(fd, 2);
   analyse_cmd(e->gauche);
+  analyse_cmd(e->droite);
   close(fd);
-  }*/
+}
 
 void sequence_et(Expression * e)
 {
@@ -215,6 +216,9 @@ void analyse_cmd(Expression * e){
   case SEQUENCE_OU:
     sequence_ou(e);
     break; 
+  case REDIRECTION_EO:
+    redirection_stdout_stderr(e);
+    break;
   default:
     printf("Seules les commandes SIMPLES sont executées.\n");
     break;
