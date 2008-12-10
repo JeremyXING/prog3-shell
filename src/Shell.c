@@ -91,14 +91,11 @@ main (int argc, char **argv)
 {
   system("clear");
   initialiser_fichier();
+  afficher_prompt();
   while (1){
     if (yyparse () == 0){
       Expression * e = ExpressionAnalysee;
-      //      if (fork()==0) => voir fichier analyse_expression.c ligne 146
       interpreter(e);
-      //analyse_cmd(e);
-      //printf("arbre : \n");
-      //arbre(e);
       
       /*--------------------------------------------------------------------------------------.
       | L'analyse de la ligne de commande est effectuée sans erreur.  La variable globale     |

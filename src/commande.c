@@ -80,14 +80,22 @@ int  cd(char ** arguments){
 
 int history(char ** arguments){
 
+
+  char * chemin = malloc((strlen(home) + strlen("/history.tmp") + 1) * sizeof(char));
+  chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
+  chemin = strncat(chemin, "/history.tmp", strlen("/history.tmp"));
+  
+
   FILE * fichier;
-  fichier = fopen("history.tmp", "r");
+  fichier = fopen(chemin, "r");
+  free(chemin);
+
   if(fichier == NULL){
     fprintf(stderr, "Aucun historique sauvegardé\n");
     return 1;
   }
   int c;
-   while ((c = getc(fichier)) != EOF)
+  while ((c = getc(fichier)) != EOF)
     putc(c, stdout);
   fclose(fichier);
   fflush(stdout);
@@ -170,13 +178,12 @@ static int lire_contenu_variable(const char* variable_env){
      return 0;
    }
    
-   /*   char * chemin_fichier = malloc((strlen(home) + strlen("/.profile")) * sizeof(char));
-   strcpy(chemin_fichier, home);
-   strcat(chemin_fichier, "/.profile");
+   char * chemin = malloc((strlen(home) + strlen("/.profile") + 1) * sizeof(char));
+   chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
+   chemin = strncat(chemin, "/.profile", strlen("/.profile"));
 
-   printf("Chemin : %s\n", chemin_fichier);*/
-
-   FILE * fichier = fopen(".profile", "r");
+   FILE * fichier = fopen(chemin, "r");
+   free(chemin);
 
    if(fichier == NULL){
      perror(".profile");

@@ -33,7 +33,12 @@ int ecrire_history(Expression *e){
   commande = NULL;
   arbre(e);
 
-  int fichier = open("history.tmp", O_WRONLY | O_CREAT | O_APPEND, 0644);
+  char * chemin = malloc((strlen(home) + strlen("/history.tmp") + 1) * sizeof(char));
+  chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
+  chemin = strncat(chemin, "/history.tmp", strlen("/history.tmp"));
+
+  int fichier = open(chemin, O_WRONLY | O_CREAT | O_APPEND, 0644);
+  free(chemin);
 
   if(fichier == -1){
     perror("");
@@ -148,7 +153,6 @@ void sequence_et(Expression * e)
   wait(NULL);
   if(status == 0 ){
     interpreter(e->droite);
-    //wait(NULL);
   }
 }
 
@@ -161,9 +165,6 @@ void sequence_ou(Expression * e)
 }
 
 int executer_cmd(Expression * e){
-
-  
-
   bool trouver = false;
   char * nom_commande = e->arguments[0];
   int pid;
@@ -187,7 +188,6 @@ int executer_cmd(Expression * e){
 }
 
 void analyse_cmd(Expression * e){
-  //ecrire_history(e->arguments);
   switch(e->type){
   case SIMPLE:
     executer_cmd(e);
@@ -226,7 +226,7 @@ void analyse_cmd(Expression * e){
 }
 
 void afficher_prompt(void){
-  //printf("%s [%s] %d -$ ", user, ptr, retour);
+  printf("%d > ", status);
 }
 
 void arbre(Expression * racine){ // parcours infixe
@@ -234,7 +234,6 @@ void arbre(Expression * racine){ // parcours infixe
     arbre(racine->gauche); //gauche
     switch(racine->type){ // racine
     case VIDE:
-      //printf("vide ");
       break;
     case SIMPLE:
       longueur += (1 + strlen(racine->arguments[0]));
@@ -332,9 +331,8 @@ int initialiser_fichier(void){
   free(buf);
   
   home = malloc(strlen(ptr) * sizeof(char));
-  home = strcpy(home, ptr);
-  //free(ptr);
-  
+  home = memcpy(home, ptr, strlen(ptr) * sizeof(char));
+
   FILE * fichier = fopen(".profile", "w+");
 
   if(fichier == NULL)
@@ -379,10 +377,12 @@ int initialiser_fichier(void){
 }
 
 void interpreter(Expression * e){
-  //  ecrire_history(e);
-  //  afficher_prompt();
+  //ecrire_history(e);
+
   if(e->type == SIMPLE || e->type == SEQUENCE_ET || e->type == SEQUENCE_OU || e->type == SEQUENCE)
     analyse_cmd(e);
   else if(fork() == 0)
     analyse_cmd(e);
+  wait(NULL);
+  afficher_prompt();
 }
