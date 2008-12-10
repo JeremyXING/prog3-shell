@@ -14,5 +14,7 @@ extern int pushd(char ** arguments);
 extern int popd(char ** arguments);
 extern int dirs(char ** arguments);
 extern int echo(char ** arguments);
+extern int source(char ** arguments);
+extern int alias_(char ** arguments);
 
 #endif /* COMMANDE_H */
