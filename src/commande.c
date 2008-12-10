@@ -18,29 +18,13 @@
 char ** tab_dir = NULL;
 int nb_dir = -1;
 
-int  pwd(char ** arguments){
-  long size;
-  char *buf;
-  char *ptr;
-  size = pathconf(".", _PC_PATH_MAX);
-  if ((buf = (char *)malloc((size_t)size)) != NULL)
-    {
-      ptr = getcwd(buf, (size_t)size);
-    }
-    printf("%s\n", ptr);
-
-    free(buf);
-    return 0;
-}
-
 int  cd(char ** arguments){
   int retour = chdir(arguments[1]);
   if(retour == -1){
     fprintf(stderr, "%s : Aucun dossier de ce type\n", arguments[1]);
     return 1;
   }
-  
-  /*
+  /* CODE PWD */  
   long size;
   char *buf;
   char *ptr;
@@ -49,48 +33,60 @@ int  cd(char ** arguments){
     {
       ptr = getcwd(buf, (size_t)size);
     }
-  free(buf);
 
-  char * chemin_fichier = malloc((strlen(ptr) + strlen(".profile")) * sizeof(char));
-  strcpy(chemin_fichier, ptr);
-  strcat(chemin_fichier, ".profile");
-  printf("%s\n", chemin_fichier);
-  FILE * fichier = fopen(chemin_fichier, "r+");
+  /*FIN CODE PWD*/
+
+  char * chemin = malloc((strlen(home) + strlen("/.profile") + 1) * sizeof(char));
+  chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
+  chemin = strncat(chemin, "/.profile", strlen("/.profile"));
   
-  free(chemin_fichier);
-
+  FILE * fichier = fopen(chemin, "r+");
+  FILE * fichier_tmp = fopen("file.tmp", "w");
+  
+  
   if(fichier == NULL){
     fprintf(stderr, "Fichier \".profile\" introuvable\n");
     return 1;
-   }
+  }
+  if(fichier_tmp == NULL){
+    perror("");
+    return 1;
+  }
 
-   char * buffer = malloc(64 * sizeof(char));
-   char * save = buffer;
+  char * retour_ligne = "\n";  
+  char ligne[256];
 
-   while((retour = fscanf(fichier, "%s", buffer)) != EOF)
-     {
-       if(strncmp(buffer, "PWD=", strlen("PWD=")) == 0){
-	 printf("%s\n", strrchr(buffer, '=')+1);
-	 break;
-       }
-     }
-   free(save);
-   fclose(fichier);*/
-   return 0;
+  char * var_pwd = "PWD=";
+  while(fgets(ligne, sizeof(ligne), fichier)){
+    if(strncmp(ligne, var_pwd, strlen(var_pwd)) != 0)
+      fputs(ligne, fichier_tmp);
+  }
+
+  fwrite(var_pwd, strlen(var_pwd) * sizeof(char), 1, fichier_tmp);
+  fwrite(ptr, strlen(ptr) * sizeof(char), 1, fichier_tmp);
+  fwrite(retour_ligne, strlen(retour_ligne) * sizeof(char), 1, fichier_tmp);
+
+  rename("file.tmp", chemin);
+  
+  free(buf);
+  free(chemin);
+  fclose(fichier);
+  fclose(fichier_tmp);
+  return 0;
 }
 
 int history(char ** arguments){
-
-
+  
+  
   char * chemin = malloc((strlen(home) + strlen("/history.tmp") + 1) * sizeof(char));
   chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
   chemin = strncat(chemin, "/history.tmp", strlen("/history.tmp"));
   
-
+  
   FILE * fichier;
   fichier = fopen(chemin, "r");
   free(chemin);
-
+  
   if(fichier == NULL){
     fprintf(stderr, "Aucun historique sauvegardé\n");
     return 1;
@@ -249,6 +245,12 @@ int echo(char ** arguments){
   return 0;
 }
 
+int  pwd(char ** arguments){
+  int retour = lire_contenu_variable("PWD");
+  printf("\n");
+  return retour;
+}
+
 static char * tab_signame[32] = {"SIGNAL 0", "SIGHUP", "SIGINT", "SIGQUIT", "SIGILL", "SIGTRAP",
 				 "SIGABRT", "SIGEMT", "SIGFPE", "SIGKILL", "SIGBUS","SIGSEGV",
 				 "SIGSYS", "SIGPIPE", "SIGALRM", "SIGTERM", "SIGURG", "SIGSTOP",
@@ -331,12 +333,10 @@ int source(char ** arguments){
     perror(arguments[1]);
     return 1;
   }
-  else{
-    char s[1000];
-    while( fgets(s, 1000 ,file) != NULL)
-      system(s);
-    return 0;
-  }
+  char s[1000];
+  while( fgets(s, 1000 ,file) != NULL)
+    system(s);
+  return 0;
 }
 
 /**************************alias*******************/
@@ -453,5 +453,24 @@ int alias_(char ** arguments){
 	printf("alias %s inexistant\n", arguments[i]);
       }
     }
+  return 0;
+}
+
+int printenv(char ** arguments){
+  char * chemin = malloc((strlen(home) + strlen("/.profile") + 1) * sizeof(char));
+  chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
+  chemin = strncat(chemin, "/.profile", strlen("/.profile"));
+  
+  FILE * fichier = fopen(chemin, "r");
+
+  if (fichier == NULL){
+    perror(arguments[1]);
+    return 1;
+  }
+  char s[1000];
+  while( fgets(s, 1000 ,fichier) != NULL)
+    printf("%s", s);
+
+  fclose(fichier);
   return 0;
 }

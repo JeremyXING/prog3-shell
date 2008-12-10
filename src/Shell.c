@@ -137,6 +137,8 @@ main (int argc, char **argv)
       `--------------------------------------------------------------------------------------*/
     }
     else {
+      status = 1;
+      afficher_prompt();
       /* L'analyse de la ligne de commande a donné une erreur */
     }
   }
