@@ -10,6 +10,7 @@
 #include <sys/times.h>
 #include <stdbool.h>
 #include <sys/wait.h>
+#include <assert.h>
 
 #include "commande.h"
 #include "analyse_expression.h"
@@ -281,7 +282,7 @@ void kill_liste_signaux(void){
     printf("%2d) %s\t", i, tab_signame[i]);
     if(j == 4){
       printf("\n");
-      j=1;
+      j=0;
     }
   }
   printf("\n");
@@ -317,4 +318,131 @@ int kill_(char ** arguments){
     break;
   }
   return abs(retour);
+}
+
+int source(char ** arguments){
+ int argc = LongueurListe(arguments);
+ if(argc < 2){
+   fprintf(stderr, "usage: source filename \n");
+   return 1;
+ }
+  FILE * file = fopen(arguments[1], "r");
+  if (file == NULL){
+    perror(arguments[1]);
+    return 1;
+  }
+  else{
+    char s[1000];
+    while( fgets(s, 1000 ,file) != NULL)
+      system(s);
+    return 0;
+  }
+}
+
+/**************************alias*******************/
+
+struct alias{
+  char * src;
+  char * dst;
+};
+
+typedef struct alias *alias;
+
+static alias * tab_alias = NULL;
+static int nb_alias = 0;
+
+void alias_modifierAlias(int no_alias, char *dst){
+  free(tab_alias[no_alias]->dst);
+  tab_alias[no_alias]->dst = dst;
+}
+
+int alias_rechercherAlias(char * src){
+  for(int i=0; i<nb_alias; i++)
+    if(strcmp(src, tab_alias[i]->src)==0)
+      return i;
+  return -1;
+}
+
+void alias_ajouterAlias(alias a){
+  int pos;
+  if((pos=alias_rechercherAlias(a->src)) != -1)//si l'alias existe
+    alias_modifierAlias(pos, a->dst);
+  else{
+    nb_alias++;
+    tab_alias = realloc(tab_alias, nb_alias*sizeof(*tab_alias));
+    assert(tab_alias);
+    tab_alias[nb_alias-1] = a;
+  }
+}
+
+void alias_supprimerAlias(int pos_alias){
+  free(tab_alias[pos_alias]->src);
+  free(tab_alias[pos_alias]->dst);
+  free(tab_alias[pos_alias]);
+  tab_alias[pos_alias] = tab_alias[nb_alias-1];
+  nb_alias--;
+}
+
+alias alias_newAlias(char * src, char * dst){
+  alias new = malloc(sizeof(*new));
+  assert(new);
+  new->src = src;
+  new->dst = dst;
+  return new;
+}
+
+char * chaine_dup(char * src){
+  if(src != NULL){
+    int taille = strlen(src);
+    char * dst = malloc(taille*sizeof(*dst));
+    assert(dst);
+    for(int i=0; i<taille; i++)
+      dst[i]=src[i];
+    dst[taille] = '\0';
+    return dst;
+  }
+  else
+    return NULL;
+}
+
+alias alias_expressionToAlias(char * expr){
+  char * s = strchr(expr, '=');
+  char *dst;
+  if(s == NULL)
+    return NULL;
+  else
+    dst = chaine_dup(s)+1;
+
+  int taille = strlen(expr) - strlen(dst);
+  char * src = malloc(taille*sizeof(*src));
+  strncpy(src, expr, taille-1); src[taille-1]='\0';
+  alias a = alias_newAlias(src, dst);
+  return a;
+
+}
+
+void alias_afficherAlias(){
+  for(int i=0; i<nb_alias; i++)
+    printf("%s = %s \n", tab_alias[i]->src, tab_alias[i]->dst);
+}
+
+int alias_(char ** arguments){
+  int argc = LongueurListe(arguments);
+  alias a;
+  int pos;
+  if(argc == 0)
+    alias_afficherAlias();
+  else
+    for(int i=1; i<argc; i++){
+      a = alias_expressionToAlias(arguments[i]);
+      if(a != NULL){
+	alias_ajouterAlias(a);
+      }
+      else if ((pos=alias_rechercherAlias(arguments[i])) != -1)
+	printf("alias %s='%s'\n", tab_alias[pos]->src, tab_alias[pos]->dst);
+      else
+	printf("alias %s inexistant\n", arguments[i]);
+
+    }
+  return 0;
 }
