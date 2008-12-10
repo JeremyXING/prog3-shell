@@ -231,7 +231,34 @@ void analyse_cmd(Expression * e){
 }
 
 void afficher_prompt(void){
-  printf("%d > ", status);
+
+  char * chemin = malloc((strlen(home) + strlen("/.profile") + 1) * sizeof(char));
+  chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
+  chemin = strncat(chemin, "/.profile", strlen("/.profile"));
+  
+  FILE * fichier = fopen(chemin, "r");
+  free(chemin);
+  
+  if(fichier == NULL){
+    perror(".profile");
+    return ;
+  }
+  
+  char * buffer = malloc(64 * sizeof(char));
+  char * save = buffer;
+  size_t len = strlen("USER");
+  int retour;
+  
+  while((retour = fscanf(fichier, "%s", buffer)) != EOF)
+    {
+      if(strncmp(buffer, "USER", len) == 0){
+	printf("%s", strrchr(buffer, '=')+1);
+	break;
+      }
+    } 
+  free(save);
+  fclose(fichier);
+  printf(" - %d > ", status);
 }
 
 void arbre(Expression * racine){ // parcours infixe
