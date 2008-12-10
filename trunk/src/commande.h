@@ -16,5 +16,5 @@ extern int dirs(char ** arguments);
 extern int echo(char ** arguments);
 extern int source(char ** arguments);
 extern int alias_(char ** arguments);
-
+extern int alias_rechercherAlias(char * src);
 #endif /* COMMANDE_H */

@@ -165,24 +165,29 @@ void sequence_ou(Expression * e)
 }
 
 int executer_cmd(Expression * e){
-  bool trouver = false;
-  char * nom_commande = e->arguments[0];
-  int pid;
-  for(int i=0; i < NB_FONCTION; i++){
-    if( strcmp(nom_fonction[i], nom_commande) == 0 ){
-      trouver = true;
-      fonction f = tableau_fonction[i];
-      status = (f)(e->arguments);
-      break;
-    }
+  if(alias_rechercherAlias(e->arguments[0]) != -1){
+    alias_(e->arguments);
   }
-  if(! trouver){
-    if((pid = fork()) == 0){
-      execvp(e->arguments[0], e->arguments );
-      fprintf(stderr, "%s : command not found\n", e->arguments[0]);
-      exit(1);
+  else {
+    bool trouver = false;
+    char * nom_commande = e->arguments[0];
+    int pid;
+    for(int i=0; i < NB_FONCTION; i++){
+      if( strcmp(nom_fonction[i], nom_commande) == 0 ){
+	trouver = true;
+	fonction f = tableau_fonction[i];
+	status = (f)(e->arguments);
+	break;
+      }
     }
-    waitpid(pid,&status, 0);
+    if(! trouver){
+      if((pid = fork()) == 0){
+	execvp(e->arguments[0], e->arguments );
+	fprintf(stderr, "%s : command not found\n", e->arguments[0]);
+	exit(1);
+      }
+      waitpid(pid,&status, 0);
+    }
   }
   return 0;
 }

@@ -433,15 +433,20 @@ int alias_(char ** arguments){
   if(argc == 1)
     alias_afficherAlias();
   else
+    printf("arguments present\n");
     for(int i=1; i<argc; i++){
       a = alias_expressionToAlias(arguments[i]);
       if(a != NULL){
+	printf("ajout de lalias, car inexistant\n");
 	alias_ajouterAlias(a);
       }
-      else if ((pos=alias_rechercherAlias(arguments[i])) != -1)
+      else if ((pos=alias_rechercherAlias(arguments[i])) != -1){
+	printf("alias trouvé\n");
 	printf("alias %s='%s'\n", tab_alias[pos]->src, tab_alias[pos]->dst);
-      else
+      }
+      else{
 	printf("alias %s inexistant\n", arguments[i]);
+      }
 
     }
   return 0;
