@@ -427,30 +427,31 @@ void alias_afficherAlias(){
 }
 
 int alias_(char ** arguments){
+  int pid;
   int argc = LongueurListe(arguments);
   alias a;
   int pos;
   if(argc == 1)
-    if((pos = alias_rechercherAlias(arguments[0])) != -1)
-      printf("on execute %s\n", tab_alias[pos]->dst);
+    if((pos = alias_rechercherAlias(arguments[0])) != -1){
+      if((pid = fork()) == 0){
+	execlp(tab_alias[pos]->dst, NULL, NULL);
+	fprintf(stderr, "%s : command not found\n",tab_alias[pos]->dst);
+	exit(1);
+      }
+      waitpid(pid,&status, 0);
+    }
     else
       alias_afficherAlias();    
   else
-    printf("arguments present\n");
     for(int i=1; i<argc; i++){
       a = alias_expressionToAlias(arguments[i]);
-      if(a != NULL){
-	printf("ajout de lalias, car inexistant\n");
+      if(a != NULL)
 	alias_ajouterAlias(a);
-      }
-      else if ((pos=alias_rechercherAlias(arguments[i])) != -1){
-	printf("alias trouvé\n");
+      else if ((pos=alias_rechercherAlias(arguments[i])) != -1)
 	printf("alias %s='%s'\n", tab_alias[pos]->src, tab_alias[pos]->dst);
-      }
       else{
 	printf("alias %s inexistant\n", arguments[i]);
       }
-
     }
   return 0;
 }

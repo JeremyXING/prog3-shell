@@ -1,9 +1,7 @@
-Revision 35:
-Implémentation de "dirs" et de "echo".
-echo gere les guillemets, les simples quotes et les $ pour les variables d'environnement stockées dans le fichier ".profile", sous la forme :
-	
-	VAR=contenu de la variable
+Bon j'ai modif le code des alias de mohamed pour que ca marche xD
 
+Au debut, meme si l'alias existait, et qu'on le tapais dans le prompt, il balancait "command not found" puisque a aucun moment on a check si c'etait un alias
+Donc j'ai modif la fonction executer_cmd qui regarde si la commande a executer est un alias ou pas. Si c'est le cas, on appel alias() avec largument
 
-
-Il faudra par la suite creer une fonction qui au lancement du Shell, créer un fichier ".profile" (s'il n'existe pas déjà) avec les variables d'env par defaut.
+Ton code au debut n'executait rien du tout meme si il trouvait l'alias, donc j'ai rajouté du code qui execute la commande si elle existe en tant qu'alias
+Ca fait brouillon, mais jvois pas comment faire autrement...
