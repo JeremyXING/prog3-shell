@@ -431,7 +431,10 @@ int alias_(char ** arguments){
   alias a;
   int pos;
   if(argc == 1)
-    alias_afficherAlias();
+    if((pos = alias_rechercherAlias(arguments[0])) != -1)
+      printf("on execute %s\n", tab_alias[pos]->dst);
+    else
+      alias_afficherAlias();    
   else
     printf("arguments present\n");
     for(int i=1; i<argc; i++){
