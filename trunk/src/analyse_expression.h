@@ -18,7 +18,7 @@ extern void interpreter(Expression * e);
 extern void afficher_prompt(void);
 extern int initialiser_fichier(void);
 extern int executer_cmd(Expression * e);
-
+extern void analyse_cmd(Expression * e);
 
 #endif /* ANALYSE_EXPRESSION */
 
