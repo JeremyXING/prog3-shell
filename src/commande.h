@@ -2,7 +2,6 @@
 #define COMMANDE_H
 
 
-
 extern int pwd(char ** arguments);
 extern int cd(char ** arguments);
 extern int history(char ** arguments);
@@ -19,4 +18,6 @@ extern int alias_(char ** arguments);
 extern int unalias_(char ** arguments);
 extern int alias_rechercherAlias(char * src);
 extern int printenv(char ** arguments);
+extern int umask_(char ** arguments);
+
 #endif /* COMMANDE_H */

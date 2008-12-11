@@ -20,11 +20,11 @@ char * home = NULL;
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", 
 				     "kill", "times", "exit", "pushd", 
 				     "popd", "dirs", "echo", "alias", 
-				     "unalias", "printenv" };
+				     "unalias", "printenv", "umask" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, 
 					    kill_, times_, toexit, pushd, 
 					    popd, dirs, echo, alias_, 
-					    unalias_, printenv};
+					    unalias_, printenv, umask_};
 /*-----------------------------------------------------------------*/
 
 int executer_cmd(Expression * e);
@@ -198,6 +198,9 @@ int executer_cmd(Expression * e){
 
 void analyse_cmd(Expression * e){
   switch(e->type){
+  case VIDE:
+    afficher_prompt();
+    break;
   case SIMPLE:
     executer_cmd(e);
     break;
@@ -427,7 +430,7 @@ int initialiser_fichier(void){
 void interpreter(Expression * e){
   //ecrire_history(e);
 
-  if(e->type == SIMPLE || e->type == SEQUENCE_ET || e->type == SEQUENCE_OU || e->type == SEQUENCE)
+  if(e->type == SIMPLE || e->type == VIDE || e->type == SEQUENCE_ET || e->type == SEQUENCE_OU || e->type == SEQUENCE)
     analyse_cmd(e);
   else if(fork() == 0)
     analyse_cmd(e);

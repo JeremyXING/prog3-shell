@@ -1,5 +1,8 @@
 /* Construction des arbres représentant des commandes */
 
+#include <signal.h>
+
+
 #include "Shell.h"
 #include "analyse_expression.h"
 
@@ -85,13 +88,27 @@ void yyerror (char *s)
    fprintf(stderr, "%s\n", s);
 }
 
-
+/*void
+f_sigint(int s)
+{
+  // kill(getpid(), SIGINT);
+  printf("Ctrl-c \n");
+}
+*/
 int
 main (int argc, char **argv) 
 {
   system("clear");
   initialiser_fichier();
   afficher_prompt();
+
+  /*struct sigaction s;
+  s.sa_handler = f_sigint;
+  sigemptyset(&s.sa_mask);     
+  s.sa_flags = 0;
+  sigaction(SIGINT, &s, NULL);*/
+
+
   while (1){
     if (yyparse () == 0){
       Expression * e = ExpressionAnalysee;
