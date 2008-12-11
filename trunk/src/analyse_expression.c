@@ -36,14 +36,14 @@ int executer_cmd(Expression * e){
     char * nom_commande = e->arguments[0];
     int pid;
     for(int i=0; i < NB_FONCTION; i++){
-      if( strcmp(nom_fonction[i], nom_commande) == 0 ){
-	trouver = true;
+      if( strcmp(nom_fonction[i], nom_commande) == 0 ){  //Si il existe une commande interne du même nom
+	trouver = true;                                  //on l'exécute simplement
 	fonction f = tableau_fonction[i];
 	status = (f)(e->arguments);
 	break;
       }
     }
-    if(! trouver){
+    if(! trouver){                                       //Sinon on exécute la commande externe dans un processus fils
       if((pid = fork()) == 0){
 	execvp(e->arguments[0], e->arguments );
 	fprintf(stderr, "%s : command not found\n", e->arguments[0]);
@@ -56,6 +56,7 @@ int executer_cmd(Expression * e){
 }
 
 void analyse_cmd(Expression * e){
+  //appel en fonction du type de l'expression
   switch(e->type){
   case VIDE:
     afficher_prompt();
@@ -95,6 +96,7 @@ void analyse_cmd(Expression * e){
     break;
   }
 }
+
 void interpreter(Expression * e){
   //ecrire_history(e);
 

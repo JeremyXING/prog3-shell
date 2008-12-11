@@ -13,9 +13,8 @@
 #include "kill.h"
 #include "echo.h"
 
-char ** tab_dir = NULL;
+char ** tab_dir = NULL; //variable globale utilisee par popd(), pushd() et dirs()
 int nb_dir = -1;
-
 
 int  cd(char ** arguments){
   int retour = chdir(arguments[1]);
@@ -23,6 +22,9 @@ int  cd(char ** arguments){
     fprintf(stderr, "%s : Aucun dossier de ce type\n", arguments[1]);
     return 1;
   }
+
+
+  /*Modification de la ligne "PWD=" dans le fichier ".profile" */
 
   long size;
   char *buf;
@@ -55,11 +57,11 @@ int  cd(char ** arguments){
 
   char * var_pwd = "PWD=";
   while(fgets(ligne, sizeof(ligne), fichier)){
-    if(strncmp(ligne, var_pwd, strlen(var_pwd)) != 0)
-      fputs(ligne, fichier_tmp);
+    if(strncmp(ligne, var_pwd, strlen(var_pwd)) != 0) //on recopie chaque ligne du fichier ".profile" dans "file.tmp"
+      fputs(ligne, fichier_tmp);                      //sauf celle qui commence par "PWD="
   }
 
-  fwrite(var_pwd, strlen(var_pwd) * sizeof(char), 1, fichier_tmp);
+  fwrite(var_pwd, strlen(var_pwd) * sizeof(char), 1, fichier_tmp);  //puis on re écrit la ligne "PWD=" dans ".profile"
   fwrite(ptr, strlen(ptr) * sizeof(char), 1, fichier_tmp);
   fwrite(retour_ligne, strlen(retour_ligne) * sizeof(char), 1, fichier_tmp);
 
@@ -174,16 +176,16 @@ int echo(char ** arguments){
     char * buf = NULL;
     for(i = 1; i < LongueurListe(arguments); i++)//pour chaque arguments
       switch(arguments[i][0]){
-      case '$':
+      case '$':  //cas pour lequel la chaine est précédée du caractère "$"
 	retour = lire_contenu_variable(arguments[i]+1);
 	break;
-      case '\"':
+      case '\"': //cas pour lequel la chaine est entourée par des doubles quotes
 	buf = malloc((strlen(arguments[i])-2) * sizeof(char));
 	buf = strncpy(buf, arguments[i]+2, strlen(arguments[i])-3);
 	retour = lire_contenu_variable(buf);
 	free(buf);
 	break;
-      case '\'':
+      case '\'': //cas pour lequel la chaine est entourée par des simples quotes
 	buf = malloc((strlen(arguments[i])-2) * sizeof(char));
 	buf = strncpy(buf, arguments[i]+1, strlen(arguments[i])-2);
 	printf("%s ", buf);
@@ -200,7 +202,7 @@ int echo(char ** arguments){
 }
 
 int  pwd(char ** arguments){
-  int retour = lire_contenu_variable("PWD");
+  int retour = lire_contenu_variable("PWD"); //Simple lecture du contenu de la variable PWD dans le fichier ".profile"
   printf("\n");
   return retour;
 }
@@ -273,17 +275,14 @@ int printenv(char ** arguments){
   return 0;
 }
 
-/**************************alias*******************/
-
-
 int alias_(char ** arguments){
   int pid;
   int argc = LongueurListe(arguments);
   alias a;
   int pos;
   if(argc == 1)
-    if((pos = alias_rechercherAlias(arguments[0])) != -1){
-      if((pid = fork()) == 0){
+    if((pos = alias_rechercherAlias(arguments[0])) != -1){ //Si l'alias existe, on exécute sa commande attachée 
+      if((pid = fork()) == 0){                             //dans un processus fils
 	execlp(alias_getDst(pos), alias_getDst(pos), NULL);
 	fprintf(stderr, "%s : command not found\n",alias_getDst(pos));
 	exit(1);
