@@ -4,11 +4,11 @@
 #include "Shell.h"
 
 
-#define NB_FONCTION 14
+#define NB_FONCTION 15
 
 typedef int (*fonction)(char **); 
-
 typedef int pid_t;
+
 extern char * nom_fonction[NB_FONCTION]; //tableau contenant les noms des fonctions builtin
 extern fonction tableau_fonction[NB_FONCTION];
 extern int status;

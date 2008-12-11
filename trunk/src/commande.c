@@ -1,17 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <signal.h>
 #include <dirent.h>
-#include <string.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <sys/times.h>
 #include <stdbool.h>
 #include <sys/wait.h>
-#include <assert.h>
+#include <sys/stat.h>
+#include <ctype.h>
 
+#include "umask.h"
 #include "commande.h"
 #include "analyse_expression.h"
 #include "alias.h"
@@ -19,6 +14,7 @@
 
 char ** tab_dir = NULL;
 int nb_dir = -1;
+
 
 int  cd(char ** arguments){
   int retour = chdir(arguments[1]);
@@ -369,4 +365,31 @@ int unalias_(char ** arguments){
   return 0;
 }
 
+int
+umask_(char **arguments)
+{
+  int argc=LongueurListe(arguments);
+  if(argc == 1)
+    {
+      um = umask(0022); //avoir le vieux umask
+      umask(um);
+      printf("%04o \n", um);
+    }
+  else
+    {
+      if(!strcmp(arguments[1],"-S"))
+        {
+          print_symbolic_umask();
+        }
+      else if(isalpha(arguments[1][1]))
+        printf("N'est pas implemente\n");
+      else if(isdigit(arguments[1][1]))
+        verifier_et_appliquer_umask(arguments[1]);
+      
+
+      else
+        umask(0777);
+    }
+  return 0;
+}
 
