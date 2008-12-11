@@ -8,6 +8,7 @@
 #include "analyse_expression.h"
 #include "commande.h"
 #include "shell_system.h"
+#include "echo.h"
 
 static char * commande = NULL;
 static int longueur = 0;
@@ -41,33 +42,9 @@ int ecrire_history(Expression *e){
 
 void afficher_prompt(void){
 
-  char * chemin = malloc((strlen(home) + strlen("/.profile") + 1) * sizeof(char));
-  chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
-  chemin = strncat(chemin, "/.profile", strlen("/.profile"));
-  
-  FILE * fichier = fopen(chemin, "r");
-  free(chemin);
-  
-  if(fichier == NULL){
-    perror(".profile");
-    return ;
-  }
-  
-  char * buffer = malloc(64 * sizeof(char));
-  char * save = buffer;
-  size_t len = strlen("USER");
-  int retour;
-  
-  while((retour = fscanf(fichier, "%s", buffer)) != EOF)
-    {
-      if(strncmp(buffer, "USER", len) == 0){
-	printf("%s", strrchr(buffer, '=')+1);
-	break;
-      }
-    } 
-  free(save);
-  fclose(fichier);
-  printf(" - %d > ", status);
+  lire_contenu_variable("USER");
+  printf("- %d > ", status);
+
 }
 
 void arbre(Expression * racine){ // parcours infixe
@@ -166,48 +143,35 @@ int initialiser_fichier(void){
   char *ptr;
   size = pathconf(".", _PC_PATH_MAX);
   if ((buf = (char *)malloc((size_t)size)) != NULL)
-    {
-      ptr = getcwd(buf, (size_t)size);
-    }
-  free(buf);
-  
+    ptr = getcwd(buf, (size_t)size);
+
   home = malloc(strlen(ptr) * sizeof(char));
   home = memcpy(home, ptr, strlen(ptr) * sizeof(char));
-
+  
   FILE * fichier = fopen(".profile", "r");
 
-  if(fichier != NULL){
+  if(fichier != NULL){ //Si le fichier existe deja
     fclose(fichier);
     char * arguments[2] = {"", "."};
     cd(arguments);
     return 0;
   }
-  else {
+  else {  //Sinon on le creer
     FILE * fichier = fopen(".profile", "w+");
-    /*CODE PWD*/
-    long size;
-    char *buf;
-    char *ptr;
-    size = pathconf(".", _PC_PATH_MAX);
-    if ((buf = (char *)malloc((size_t)size)) != NULL)
-     	ptr = getcwd(buf, (size_t)size);
-    /*FIN CODE PWD*/
 
-
-    /*CODE USER*/
     char * user = NULL;
     user = getenv("USER");
     if(user == NULL)
       strcpy(user, "unknown_user");
-    /*FIN CODE USER*/
-
-
+    
     char * retour = "\n";
 
     char * var_user = "USER=";
     char * var_pwd = "PWD=";
     char * var_home = "HOME=";
         
+
+    /* On écrit dans ".profile" les variables PWD, USER et HOME */
     
     fwrite(var_user, strlen(var_user) * sizeof(char), 1, fichier);
     fwrite(user, strlen(user) * sizeof(char), 1, fichier);
@@ -220,9 +184,9 @@ int initialiser_fichier(void){
     fwrite(var_pwd, strlen(var_pwd) * sizeof(char), 1, fichier);
     fwrite(ptr, strlen(ptr) * sizeof(char), 1, fichier);
     fwrite(retour, strlen(retour) * sizeof(char), 1, fichier);
-
     
     free(buf);
+    free(user);
     fclose(fichier);
     return 0;
   }

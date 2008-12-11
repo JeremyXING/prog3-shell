@@ -35,7 +35,7 @@ int lire_contenu_variable(const char* variable_env){
    while((retour = fscanf(fichier, "%s", buffer)) != EOF)
      {
        if(strncmp(buffer, variable_env, len) == 0){
-	 printf("%s\t", strrchr(buffer, '=')+1);
+	 printf("%s ", strrchr(buffer, '=')+1);
 	 break;
        }
      } 
