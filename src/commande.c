@@ -11,6 +11,7 @@
 #include "analyse_expression.h"
 #include "alias.h"
 #include "kill.h"
+#include "echo.h"
 
 char ** tab_dir = NULL;
 int nb_dir = -1;
@@ -22,7 +23,7 @@ int  cd(char ** arguments){
     fprintf(stderr, "%s : Aucun dossier de ce type\n", arguments[1]);
     return 1;
   }
-  /* CODE PWD */  
+
   long size;
   char *buf;
   char *ptr;
@@ -31,8 +32,6 @@ int  cd(char ** arguments){
     {
       ptr = getcwd(buf, (size_t)size);
     }
-
-  /*FIN CODE PWD*/
 
   char * chemin = malloc((strlen(home) + strlen("/.profile") + 1) * sizeof(char));
   chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
@@ -165,49 +164,6 @@ int popd(char ** arguments){
 
   return 0;
 }
-
-static int lire_contenu_variable(const char* variable_env){
-
-   if(strcmp(variable_env, "?") == 0){
-     printf("%d", status);
-     return 0;
-   }
-   
-   char * chemin = malloc((strlen(home) + strlen("/.profile") + 1) * sizeof(char));
-   chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
-   chemin = strncat(chemin, "/.profile", strlen("/.profile"));
-
-   FILE * fichier = fopen(chemin, "r");
-   free(chemin);
-
-   if(fichier == NULL){
-     perror(".profile");
-     return 1;
-   }
-
-   char * buffer = malloc(64 * sizeof(char));
-   char * save = buffer;
-   size_t len = strlen(variable_env);
-   int retour;
-
-   while((retour = fscanf(fichier, "%s", buffer)) != EOF)
-     {
-       if(strncmp(buffer, variable_env, len) == 0){
-	 printf("%s\t", strrchr(buffer, '=')+1);
-	 break;
-       }
-     } 
-
-   if(retour == EOF){
-     fprintf(stderr, "Variable %s inexistante !", variable_env);
-     free(save);
-     return 1;
-   }
-
-   free(save);
-   fclose(fichier);
-   return 0;
- }
 
 int echo(char ** arguments){
   int retour = 0;
