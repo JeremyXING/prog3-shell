@@ -14,6 +14,8 @@
 
 #include "commande.h"
 #include "analyse_expression.h"
+#include "alias.h"
+#include "kill.h"
 
 char ** tab_dir = NULL;
 int nb_dir = -1;
@@ -251,45 +253,6 @@ int  pwd(char ** arguments){
   return retour;
 }
 
-static char * tab_signame[32] = {"SIGNAL 0", "SIGHUP", "SIGINT", "SIGQUIT", "SIGILL", "SIGTRAP",
-				 "SIGABRT", "SIGEMT", "SIGFPE", "SIGKILL", "SIGBUS","SIGSEGV",
-				 "SIGSYS", "SIGPIPE", "SIGALRM", "SIGTERM", "SIGURG", "SIGSTOP",
-				 "SIGTSTP", "SIGCONT", "SIGCHLD", "SIGTTIN", "SIGTTOU", "SIGIO",
-				 "SIGXCPU", "SIGXFSZ", "SIGVTALRM", "SIGPROF", "SIGWINCH", "SIGINFO",
-				 "SIGUSR1", "SIGUSR2"};
-
-#define NB_SIG  32
-
-
-static int kill_no_signal(char * sig){
-  if(atoi(sig) != 0)
-    return atoi(sig);
-  for(int i=1; i < NB_SIG; i++)
-    if( strcmp(sig, tab_signame[i]) == 0 )
-      return i;
-  printf("Signal inexistant.\n");
-  return -1;
-  
-}
-
-static int kill_usage(void){
-  printf("Usage: kill [-s sigspec | -n signum | -sigspec] pid\n");
-  printf("       kill -l [sigspec]\n");
-  return 1;
-}
-
-void kill_liste_signaux(void){
-  int i,j;
-  for(i=1, j=1; i < NB_SIG; i++, j++){
-    printf("%2d) %s\t", i, tab_signame[i]);
-    if(j == 4){
-      printf("\n");
-      j=0;
-    }
-  }
-  printf("\n");
-}
-
 int kill_(char ** arguments){
   int retour = 0;
   int signal_default = 15;
@@ -339,123 +302,6 @@ int source(char ** arguments){
   return 0;
 }
 
-/**************************alias*******************/
-
-struct alias{
-  char * src;
-  char * dst;
-};
-
-typedef struct alias *alias;
-
-static alias * tab_alias = NULL;
-static int nb_alias = 0;
-
-void alias_modifierAlias(int no_alias, char *dst){
-  free(tab_alias[no_alias]->dst);
-  tab_alias[no_alias]->dst = dst;
-}
-
-int alias_rechercherAlias(char * src){
-  for(int i=0; i<nb_alias; i++)
-    if(strcmp(src, tab_alias[i]->src)==0)
-      return i;
-  return -1;
-}
-
-void alias_ajouterAlias(alias a){
-  int pos;
-  if((pos=alias_rechercherAlias(a->src)) != -1)//si l'alias existe
-    alias_modifierAlias(pos, a->dst);
-  else{
-    nb_alias++;
-    tab_alias = realloc(tab_alias, nb_alias*sizeof(*tab_alias));
-    assert(tab_alias);
-    tab_alias[nb_alias-1] = a;
-  }
-}
-
-void alias_supprimerAlias(int pos_alias){
-  free(tab_alias[pos_alias]->src);
-  free(tab_alias[pos_alias]->dst);
-  free(tab_alias[pos_alias]);
-  tab_alias[pos_alias] = tab_alias[nb_alias-1];
-  nb_alias--;
-}
-
-alias alias_newAlias(char * src, char * dst){
-  alias new = malloc(sizeof(*new));
-  assert(new);
-  new->src = src;
-  new->dst = dst;
-  return new;
-}
-
-char * chaine_dup(char * src){
-  if(src != NULL){
-    int taille = strlen(src);
-    char * dst = malloc(taille*sizeof(*dst));
-    assert(dst);
-    for(int i=0; i<taille; i++)
-      dst[i]=src[i];
-    dst[taille] = '\0';
-    return dst;
-  }
-  else
-    return NULL;
-}
-
-alias alias_expressionToAlias(char * expr){
-  char * s = strchr(expr, '=');
-  char *dst;
-  if(s == NULL)
-    return NULL;
-  else
-    dst = chaine_dup(s)+1;
-
-  int taille = strlen(expr) - strlen(dst);
-  char * src = malloc(taille*sizeof(*src));
-  strncpy(src, expr, taille-1); src[taille-1]='\0';
-  alias a = alias_newAlias(src, dst);
-  return a;
-
-}
-
-void alias_afficherAlias(){
-  for(int i=0; i<nb_alias; i++)
-    printf("%s = %s \n", tab_alias[i]->src, tab_alias[i]->dst);
-}
-
-int alias_(char ** arguments){
-  int pid;
-  int argc = LongueurListe(arguments);
-  alias a;
-  int pos;
-  if(argc == 1)
-    if((pos = alias_rechercherAlias(arguments[0])) != -1){
-      if((pid = fork()) == 0){
-	execlp(tab_alias[pos]->dst, NULL, NULL);
-	fprintf(stderr, "%s : command not found\n",tab_alias[pos]->dst);
-	exit(1);
-      }
-      waitpid(pid,&status, 0);
-    }
-    else
-      alias_afficherAlias();    
-  else
-    for(int i=1; i<argc; i++){
-      a = alias_expressionToAlias(arguments[i]);
-      if(a != NULL)
-	alias_ajouterAlias(a);
-      else if ((pos=alias_rechercherAlias(arguments[i])) != -1)
-	printf("alias %s='%s'\n", tab_alias[pos]->src, tab_alias[pos]->dst);
-      else{
-	printf("alias %s inexistant\n", arguments[i]);
-      }
-    }
-  return 0;
-}
-
 int printenv(char ** arguments){
   char * chemin = malloc((strlen(home) + strlen("/.profile") + 1) * sizeof(char));
   chemin = memcpy(chemin, home, (strlen(home) + 1) * sizeof(char));
@@ -474,3 +320,54 @@ int printenv(char ** arguments){
   fclose(fichier);
   return 0;
 }
+
+/**************************alias*******************/
+
+
+int alias_(char ** arguments){
+  int pid;
+  int argc = LongueurListe(arguments);
+  alias a;
+  int pos;
+  if(argc == 1)
+    if((pos = alias_rechercherAlias(arguments[0])) != -1){
+      if((pid = fork()) == 0){
+	execlp(alias_getDst(pos), NULL, NULL);
+	fprintf(stderr, "%s : command not found\n",alias_getDst(pos));
+	exit(1);
+      }
+      waitpid(pid,&status, 0);
+    }
+    else
+      alias_afficherAlias();    
+  else
+    for(int i=1; i<argc; i++){
+      a = alias_expressionToAlias(arguments[i]);
+      if(a != NULL)
+	alias_ajouterAlias(a);
+      else if ((pos=alias_rechercherAlias(arguments[i])) != -1)
+	printf("alias %s='%s'\n", arguments[i], alias_getDst(pos));
+      else{
+	printf("alias %s inexistant\n", arguments[i]);
+      }
+    }
+  return 0;
+}
+
+int unalias_(char ** arguments){
+  printf("unalias\n");
+  int pos;
+  int argc = LongueurListe(arguments);
+  if(argc == 1)
+    fprintf(stderr,"usage: unalias name [name ...]\n");
+  for(int i=1; i<argc; i++){
+    pos=alias_rechercherAlias(arguments[i]);
+    if(pos != -1)
+      alias_supprimerAlias(pos);
+    else
+      printf("unalias: %s non trouvé\n",arguments[i]);
+  }
+  return 0;
+}
+
+
