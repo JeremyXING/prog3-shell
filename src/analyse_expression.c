@@ -18,9 +18,13 @@ char * home = NULL;
 
 /*----------- Tableau des fonctions internes(commande.h) ---------- */
 char * nom_fonction[NB_FONCTION] = { "pwd", "cd", "history", "builtins", 
-				     "kill", "times", "exit", "pushd", "popd", "dirs", "echo", "alias", "printenv" };
+				     "kill", "times", "exit", "pushd", 
+				     "popd", "dirs", "echo", "alias", 
+				     "unalias", "printenv" };
 fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins, 
-					    kill_, times_, toexit, pushd, popd, dirs, echo, alias_, printenv};
+					    kill_, times_, toexit, pushd, 
+					    popd, dirs, echo, alias_, 
+					    unalias_, printenv};
 /*-----------------------------------------------------------------*/
 
 int executer_cmd(Expression * e);

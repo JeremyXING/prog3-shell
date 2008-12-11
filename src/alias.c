@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+
+#include "alias.h"
+
+static alias * tab_alias = NULL;
+static int nb_alias = 0;
+
+static void alias_modifierAlias(int no_alias, char *dst){
+  free(tab_alias[no_alias]->dst);
+  tab_alias[no_alias]->dst = dst;
+}
+
+int alias_rechercherAlias(char * src){
+  for(int i=0; i<nb_alias; i++)
+    if(strcmp(src, tab_alias[i]->src)==0)
+      return i;
+  return -1;
+}
+
+void alias_ajouterAlias(alias a){
+  int pos;
+  if((pos=alias_rechercherAlias(a->src)) != -1)//si l'alias existe
+    alias_modifierAlias(pos, a->dst);
+  else{
+    nb_alias++;
+    tab_alias = realloc(tab_alias, nb_alias*sizeof(*tab_alias));
+    assert(tab_alias);
+    tab_alias[nb_alias-1] = a;
+  }
+}
+
+void alias_supprimerAlias(int pos_alias){
+  free(tab_alias[pos_alias]->src);
+  free(tab_alias[pos_alias]->dst);
+  free(tab_alias[pos_alias]);
+  tab_alias[pos_alias] = tab_alias[nb_alias-1];
+  nb_alias--;
+}
+
+static alias alias_newAlias(char * src, char * dst){
+  alias new = malloc(sizeof(*new));
+  assert(new);
+  new->src = src;
+  new->dst = dst;
+  return new;
+}
+
+static char * chaine_dup(char * src){
+  if(src != NULL){
+    int taille = strlen(src);
+    char * dst = malloc(taille*sizeof(*dst));
+    assert(dst);
+    for(int i=0; i<taille; i++)
+      dst[i]=src[i];
+    dst[taille] = '\0';
+    return dst;
+  }
+  else
+    return NULL;
+}
+
+alias alias_expressionToAlias(char * expr){
+  char * s = strchr(expr, '=');
+  char *dst;
+  if(s == NULL)
+    return NULL;
+  else
+    dst = chaine_dup(s)+1;
+
+  int taille = strlen(expr) - strlen(dst);
+  char * src = malloc(taille*sizeof(*src));
+  strncpy(src, expr, taille-1); src[taille-1]='\0';
+  alias a = alias_newAlias(src, dst);
+  return a;
+
+}
+
+void alias_afficherAlias(){
+  for(int i=0; i<nb_alias; i++)
+    printf("%s = %s \n", tab_alias[i]->src, tab_alias[i]->dst);
+}
+
+char * alias_getDst(int pos){
+  return tab_alias[pos]->dst;
+}
