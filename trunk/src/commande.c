@@ -332,7 +332,7 @@ int alias_(char ** arguments){
   if(argc == 1)
     if((pos = alias_rechercherAlias(arguments[0])) != -1){
       if((pid = fork()) == 0){
-	execlp(alias_getDst(pos), NULL, NULL);
+	execlp(alias_getDst(pos), alias_getDst(pos), NULL);
 	fprintf(stderr, "%s : command not found\n",alias_getDst(pos));
 	exit(1);
       }
@@ -355,7 +355,6 @@ int alias_(char ** arguments){
 }
 
 int unalias_(char ** arguments){
-  printf("unalias\n");
   int pos;
   int argc = LongueurListe(arguments);
   if(argc == 1)
