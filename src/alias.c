@@ -40,14 +40,6 @@ void alias_supprimerAlias(int pos_alias){
   nb_alias--;
 }
 
-static alias alias_newAlias(char * src, char * dst){
-  alias new = malloc(sizeof(*new));
-  assert(new);
-  new->src = src;
-  new->dst = dst;
-  return new;
-}
-
 static char * chaine_dup(char * src){
   if(src != NULL){
     int taille = strlen(src);
@@ -62,18 +54,29 @@ static char * chaine_dup(char * src){
     return NULL;
 }
 
+static alias alias_newAlias(char * src, char * dst){
+  alias new = malloc(sizeof(*new));
+  assert(new);
+  new->src = chaine_dup(src);
+  new->dst = chaine_dup(dst);
+  return new;
+}
+
+
+
 alias alias_expressionToAlias(char * expr){
   char * s = strchr(expr, '=');
   char *dst;
   if(s == NULL)
     return NULL;
   else
-    dst = chaine_dup(s)+1;
+    dst = s+1;
 
   int taille = strlen(expr) - strlen(dst);
   char * src = malloc(taille*sizeof(*src));
   strncpy(src, expr, taille-1); src[taille-1]='\0';
   alias a = alias_newAlias(src, dst);
+  free(src);
   return a;
 
 }
