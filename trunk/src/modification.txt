@@ -5,3 +5,10 @@ Donc j'ai modif la fonction executer_cmd qui regarde si la commande a executer e
 
 Ton code au debut n'executait rien du tout meme si il trouvait l'alias, donc j'ai rajouté du code qui execute la commande si elle existe en tant qu'alias
 Ca fait brouillon, mais jvois pas comment faire autrement...
+
+J'ai modifier ce qu'il faut pour que n'import qu'elle alias soit executer...
+Sinon il y a un problem c'est normal qu'il m'affiche Fichier ".profile" introuvable
+      	     		      	     	   	     .profile: No such file or directory
+Et il va afficher ca a chaque fois j'execute une commande
+
+

@@ -15,6 +15,8 @@ extern alias alias_expressionToAlias(char * expr);
 extern int alias_rechercherAlias(char * src);
 extern void alias_afficherAlias();
 extern char * alias_getDst(int pos);
+extern void remplacer_alias_(char *argument, Expression *e);
+
 
 #endif /* ALIAS */
 

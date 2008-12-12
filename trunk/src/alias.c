@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include "analyse_expression.h"
+#include "Shell.h"
 #include "alias.h"
 
 static alias * tab_alias = NULL;
@@ -88,4 +90,16 @@ void alias_afficherAlias(){
 
 char * alias_getDst(int pos){
   return tab_alias[pos]->dst;
+}
+
+void
+remplacer_alias_(char *argument, Expression *e)
+{
+  char *valeur= alias_getDst(alias_rechercherAlias(argument));
+  int nb_arg =LongueurListe(e->arguments);
+  char **nouv_arg=malloc(sizeof(nouv_arg)*nb_arg);
+  nouv_arg[0]=chaine_dup(valeur);
+  for(int i = 1; i < nb_arg; i++)
+    nouv_arg[i]=chaine_dup(e->arguments[i]);
+  interpreter( ConstruireNoeud(e->type, e->gauche, e->droite, nouv_arg));
 }
