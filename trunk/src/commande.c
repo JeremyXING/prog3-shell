@@ -327,14 +327,10 @@ umask_(char **arguments)
         {
           print_symbolic_umask();
         }
-      else if(isalpha(arguments[1][1]))
+      else if(isalpha(arguments[1][0]))
         printf("N'est pas implemente\n");
-      else if(isdigit(arguments[1][1]))
+      else if(isdigit(arguments[1][0]))
         verifier_et_appliquer_umask(arguments[1]);
-      
-
-      else
-        umask(0777);
     }
   return 0;
 }
