@@ -11,7 +11,7 @@
 #include "Shell.h"
 #include "expression.h"
 #include "shell_system.h"
-#include "alias.h"
+
 
 int status;
 char * home = NULL;
@@ -29,7 +29,7 @@ fonction  tableau_fonction[NB_FONCTION] = { pwd, cd , history, builtins,
 
 int executer_cmd(Expression * e){
   if(alias_rechercherAlias(e->arguments[0]) != -1){
-    remplacer_alias_(e->arguments[0],e);
+    alias_(e->arguments);
   }
   else {
     bool trouver = false;
