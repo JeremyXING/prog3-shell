@@ -281,16 +281,7 @@ int alias_(char ** arguments){
   alias a;
   int pos;
   if(argc == 1)
-    if((pos = alias_rechercherAlias(arguments[0])) != -1){ //Si l'alias existe, on exécute sa commande attachée 
-      if((pid = fork()) == 0){                             //dans un processus fils
-	execlp(alias_getDst(pos), alias_getDst(pos), NULL);
-	fprintf(stderr, "%s : command not found\n",alias_getDst(pos));
-	exit(1);
-      }
-      waitpid(pid,&status, 0);
-    }
-    else
-      alias_afficherAlias();    
+    alias_afficherAlias();    
   else
     for(int i=1; i<argc; i++){
       a = alias_expressionToAlias(arguments[i]);
