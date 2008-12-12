@@ -9,9 +9,9 @@ Shell: Shell.o analyse_expression.o umask.o commande.o y.tab.o lex.yy.o alias.o 
 
 Shell.o: Shell.c Shell.h
 
-alias.o: alias.c alias.h
-
 analyse_expression.o: analyse_expression.c analyse_expression.h
+
+alias.o: alias.c alias.h
 
 kill.o: kill.c kill.h
 
