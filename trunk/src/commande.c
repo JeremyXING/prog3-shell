@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <signal.h>
 
 #include "umask.h"
 #include "commande.h"
@@ -281,7 +282,16 @@ int alias_(char ** arguments){
   alias a;
   int pos;
   if(argc == 1)
-    alias_afficherAlias();    
+    if((pos = alias_rechercherAlias(arguments[0])) != -1){ //Si l'alias existe, on exécute sa commande attachée 
+      if((pid = fork()) == 0){                             //dans un processus fils
+	execlp(alias_getDst(pos), alias_getDst(pos), NULL);
+	fprintf(stderr, "%s : command not found\n",alias_getDst(pos));
+	exit(1);
+      }
+      waitpid(pid,&status, 0);
+    }
+    else
+      alias_afficherAlias();    
   else
     for(int i=1; i<argc; i++){
       a = alias_expressionToAlias(arguments[i]);
@@ -327,10 +337,14 @@ umask_(char **arguments)
         {
           print_symbolic_umask();
         }
-      else if(isalpha(arguments[1][0]))
+      else if(isalpha(arguments[1][1]))
         printf("N'est pas implemente\n");
-      else if(isdigit(arguments[1][0]))
+      else if(isdigit(arguments[1][1]))
         verifier_et_appliquer_umask(arguments[1]);
+      
+
+      else
+        umask(0777);
     }
   return 0;
 }
